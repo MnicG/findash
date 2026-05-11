@@ -1,10 +1,6 @@
-# Dependências
 node_modules/
-
-# Variáveis de ambiente (senhas, tokens)
 .env
-
-# Build
+generated/
 dist/
 build/
 
@@ -13,3 +9,5 @@ build/
 
 # Sistema
 .DS_Store
+
+
