@@ -1,0 +1,15 @@
+# Dependências
+node_modules/
+
+# Variáveis de ambiente (senhas, tokens)
+.env
+
+# Build
+dist/
+build/
+
+# Prisma
+*.db
+
+# Sistema
+.DS_Store
