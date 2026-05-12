@@ -1,25 +1,20 @@
-import { Request, Response, NextFunction, ErrorRequestHandler } from "express";
-import { ApiError } from "../utils/ApiError";
+import { Request, Response, NextFunction } from "express";
+import { ZodSchema } from "zod";
 
-export const errorMiddleware: ErrorRequestHandler = (
-  err,
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  if (err instanceof ApiError) {
-    const apiError = err as ApiError;
-    res.status(apiError.statusCode).json({
-      status: "error",
-      message: apiError.message,
-    });
-    return;
-  }
+export const validate =
+  (schema: ZodSchema) =>
+  (req: Request, res: Response, next: NextFunction) => {
+    const result = schema.safeParse(req.body);
 
-  console.error(err);
+    if (!result.success) {
+      res.status(400).json({
+        status: "error",
+        message: "Validation error",
+        errors: result.error.flatten().fieldErrors,
+      });
+      return;
+    }
 
-  res.status(500).json({
-    status: "error",
-    message: "Internal server error",
-  });
-};
+    req.body = result.data;
+    next();
+  };
