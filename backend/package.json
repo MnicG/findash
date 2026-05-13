@@ -4,11 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon --watch src --ext ts --exec ts-node src/server.ts",
-    "build": "tsc",
-    "start": "node dist/server.js",
-    "test": "jest"
-  },
+  "dev": "nodemon --watch src --ext ts --exec ts-node src/server.ts",
+  "build": "npx prisma generate && npx prisma migrate deploy && tsc",
+  "start": "node dist/server.js",
+  "test": "jest"
+},
+  
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -39,4 +40,5 @@
     "ts-node": "^10.9.2",
     "typescript": "^6.0.3"
   }
+  
 }
