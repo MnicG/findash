@@ -9,7 +9,13 @@ import newsRoutes from "./modules/news/news.routes";
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+app.options('*', cors()); // handle preflight explicitly
 app.use(express.json());
 
 app.get("/health", (req, res) => {
