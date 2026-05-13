@@ -15,7 +15,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
-app.options('*', cors()); // handle preflight explicitly
+app.options('*splat', cors());
 app.use(express.json());
 
 app.get("/health", (req, res) => {
