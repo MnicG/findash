@@ -6,29 +6,18 @@ export const stocksService = {
     try {
       const response = await httpClient.get(
         `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}`,
-        {
-          params: {
-            interval: "1d",
-            range: "1d",
-          },
-        }
+        { params: { interval: "1d", range: "1d" } }
       );
-
       const result = response.data.chart.result[0];
       if (!result) throw new ApiError(404, "Stock not found");
-
       const meta = result.meta;
-
       return {
         symbol: meta.symbol,
         name: meta.longName || meta.shortName,
         price: meta.regularMarketPrice,
         previousClose: meta.chartPreviousClose,
         change: meta.regularMarketPrice - meta.chartPreviousClose,
-        changePercent:
-          ((meta.regularMarketPrice - meta.chartPreviousClose) /
-            meta.chartPreviousClose) *
-          100,
+        changePercent: ((meta.regularMarketPrice - meta.chartPreviousClose) / meta.chartPreviousClose) * 100,
         currency: meta.currency,
         exchange: meta.exchangeName,
       };
@@ -40,29 +29,39 @@ export const stocksService = {
 
   async getHistory(symbol: string, range: string = "1mo") {
     try {
+      const interval = range === "1d" ? "5m" : "1d";
       const response = await httpClient.get(
         `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}`,
-        {
-          params: {
-            interval: "1d",
-            range,
-          },
-        }
+        { params: { interval, range } }
       );
-
       const result = response.data.chart.result[0];
       if (!result) throw new ApiError(404, "Stock not found");
-
       const timestamps = result.timestamp;
       const closes = result.indicators.quote[0].close;
-
       return timestamps.map((ts: number, i: number) => ({
-        date: new Date(ts * 1000).toISOString().split("T")[0],
+        date: range === "1d"
+          ? new Date(ts * 1000).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
+          : new Date(ts * 1000).toISOString().split("T")[0],
         close: closes[i],
-      }));
+      })).filter((d: { close: number }) => d.close !== null);
     } catch (error) {
       if (error instanceof ApiError) throw error;
       throw new ApiError(502, "Failed to fetch stock history");
+    }
+  },
+
+  async search(query: string) {
+    try {
+      const response = await httpClient.get(
+        `https://query1.finance.yahoo.com/v1/finance/search`,
+        { params: { q: query, quotesCount: 6, newsCount: 0 } }
+      );
+      const quotes = response.data.quotes || [];
+      return quotes
+        .filter((q: any) => q.symbol && q.quoteType === "EQUITY" || q.quoteType === "ETF")
+        .map((q: any) => ({ symbol: q.symbol, name: q.longname || q.shortname || q.symbol }));
+    } catch (error) {
+      throw new ApiError(502, "Failed to search stocks");
     }
   },
 };

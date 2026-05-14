@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useStockQuote, useStockHistory } from '../../hooks'
 import Card from '../../components/ui/Card'
 import { Search, TrendingUp, TrendingDown } from 'lucide-react'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
+import api from '../../api/axios'
 
 const POPULAR = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'PETR4.SA', 'VALE3.SA']
 const RANGES = ['1d', '1mo', '3mo', '6mo', '1y']
@@ -11,12 +12,44 @@ export default function Stocks() {
   const [search, setSearch] = useState('')
   const [symbol, setSymbol] = useState('AAPL')
   const [range, setRange] = useState('1mo')
+  const [suggestions, setSuggestions] = useState<{ symbol: string; name: string }[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const wrapperRef = useRef<HTMLDivElement>(null)
+
   const { data: quote, isLoading: quoteLoading } = useStockQuote(symbol)
   const { data: history, isLoading: histLoading } = useStockHistory(symbol, range)
 
+  useEffect(() => {
+    if (search.length < 1) { setSuggestions([]); return }
+    const t = setTimeout(async () => {
+      try {
+        const res = await api.get(`/stocks/search?q=${search}`)
+        setSuggestions(res.data)
+        setShowSuggestions(true)
+      } catch { setSuggestions([]) }
+    }, 300)
+    return () => clearTimeout(t)
+  }, [search])
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node))
+        setShowSuggestions(false)
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
+
+  const selectSymbol = (s: string) => {
+    setSymbol(s)
+    setSearch('')
+    setSuggestions([])
+    setShowSuggestions(false)
+  }
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
-    if (search.trim()) setSymbol(search.trim().toUpperCase())
+    if (search.trim()) selectSymbol(search.trim().toUpperCase())
   }
 
   return (
@@ -27,18 +60,33 @@ export default function Stocks() {
       </div>
 
       <form onSubmit={handleSearch} className="flex gap-3 mb-6">
-        <div className="relative flex-1 max-w-sm">
+        <div className="relative flex-1 max-w-sm" ref={wrapperRef}>
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input value={search} onChange={(e) => setSearch(e.target.value)}
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
             placeholder="Search symbol (e.g. AAPL)"
-            className="w-full pl-9 pr-4 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-emerald-500 transition-colors" />
+            className="w-full pl-9 pr-4 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-emerald-500 transition-colors"
+          />
+          {showSuggestions && suggestions.length > 0 && (
+            <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg overflow-hidden">
+              {suggestions.map((s) => (
+                <button key={s.symbol} type="button" onClick={() => selectSymbol(s.symbol)}
+                  className="w-full px-4 py-2.5 text-left hover:bg-slate-50 flex items-center justify-between">
+                  <span className="font-medium text-slate-800 text-sm">{s.symbol}</span>
+                  <span className="text-xs text-slate-400 truncate ml-2">{s.name}</span>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
         <button type="submit" className="bg-emerald-500 hover:bg-emerald-400 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">Search</button>
       </form>
 
       <div className="flex flex-wrap gap-2 mb-6">
         {POPULAR.map((s) => (
-          <button key={s} onClick={() => setSymbol(s)}
+          <button key={s} onClick={() => selectSymbol(s)}
             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
               symbol === s ? 'bg-emerald-500 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:border-emerald-300'
             }`}>{s}</button>

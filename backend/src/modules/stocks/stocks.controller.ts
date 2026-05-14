@@ -13,10 +13,13 @@ export const stocksController = {
   getHistory: asyncHandler(async (req: AuthRequest, res: Response) => {
     const { symbol } = req.params;
     const { range } = req.query;
-    const history = await stocksService.getHistory(
-      symbol as string,
-      range as string
-    );
+    const history = await stocksService.getHistory(symbol as string, range as string);
     res.json(history);
+  }),
+
+  search: asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { q } = req.query;
+    const results = await stocksService.search(q as string);
+    res.json(results);
   }),
 };
