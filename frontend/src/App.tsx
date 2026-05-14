@@ -10,7 +10,8 @@ import Quotes from './pages/Quotes'
 import News from './pages/News'
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, isLoading } = useAuth()
+  if (isLoading) return null  // wait before redirecting
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />
 }
 
