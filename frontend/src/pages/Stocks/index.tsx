@@ -66,7 +66,7 @@ export default function Stocks() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-            placeholder="Search symbol (e.g. AAPL)"
+            placeholder="Search company or symbol (e.g. Apple, AAPL)"
             className="w-full pl-9 pr-4 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-emerald-500 transition-colors"
           />
           {showSuggestions && suggestions.length > 0 && (

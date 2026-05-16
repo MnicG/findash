@@ -267,7 +267,7 @@ export default function ClientDetail() {
                 ) : (
                   <div className="relative">
                     <input value={search} onChange={e => setSearch(e.target.value)}
-                      placeholder="Search symbol..."
+                      placeholder="Search company or symbol (e.g. Apple, AAPL)"
                       className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500" />
                     {suggestions.length > 0 && (
                       <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg overflow-hidden">
