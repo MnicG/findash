@@ -61,15 +61,18 @@ export const stocksService = {
   async search(query: string) {
   try {
     const response = await httpClient.get(
-      `https://query1.finance.yahoo.com/v1/finance/search`,
-      { params: { q: query, quotesCount: 8, newsCount: 0 } }
+      `https://query1.finance.yahoo.com/v8/finance/search`,
+      {
+        params: { q: query, quotesCount: 8, newsCount: 0, enableFuzzyQuery: false },
+        headers: { 'User-Agent': 'Mozilla/5.0' }
+      }
     );
     const quotes = response.data.quotes || [];
     return quotes
       .filter((q: any) => q.symbol)
       .map((q: any) => ({
         symbol: q.symbol,
-        name: q.longname || q.shortname || q.dispSecIndTerm || q.symbol
+        name: q.longname || q.shortname || q.symbol
       }));
   } catch (error) {
     throw new ApiError(502, "Failed to search stocks");
