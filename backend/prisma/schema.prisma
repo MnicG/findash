@@ -19,14 +19,44 @@ model User {
 }
 
 model Client {
-  id        String   @id @default(cuid())
-  name      String
-  email     String
-  phone     String?
-  document  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  name        String
+  email       String
+  phone       String?
+  document    String?
+  riskProfile String?  @default("moderate")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+
+  portfolio   Position[]
+  transactions Transaction[]
+}
+
+model Position {
+  id           String   @id @default(cuid())
+  symbol       String
+  name         String
+  quantity     Float
+  avgBuyPrice  Float
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  clientId     String
+  client       Client   @relation(fields: [clientId], references: [id])
+}
+
+model Transaction {
+  id        String   @id @default(cuid())
+  symbol    String
+  name      String
+  type      String   // "buy" or "sell"
+  quantity  Float
+  price     Float
+  date      DateTime @default(now())
+
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id])
 }
