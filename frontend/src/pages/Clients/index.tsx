@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useClients, useCreateClient, useUpdateClient, useDeleteClient } from '../../hooks'
 import Card from '../../components/ui/Card'
 import { Plus, Pencil, Trash2, X } from 'lucide-react'
@@ -8,6 +9,7 @@ type FormData = { name: string; email: string; phone: string; document: string }
 const empty: FormData = { name: '', email: '', phone: '', document: '' }
 
 export default function Clients() {
+  const navigate = useNavigate()
   const { data: clients, isLoading } = useClients()
   const createClient = useCreateClient()
   const updateClient = useUpdateClient()
@@ -58,14 +60,17 @@ export default function Clients() {
               <tbody>
                 {clients.map((c) => (
                   <tr key={c.id} className="border-b border-slate-50 last:border-0">
-                    <td className="py-3 text-sm font-medium text-slate-700">{c.name}</td>
+                    <td className="py-3 text-sm font-medium text-slate-700 cursor-pointer hover:text-emerald-500"
+                      onClick={() => navigate(`/clients/${c.id}`)}>
+                      {c.name}
+                    </td>
                     <td className="py-3 text-sm text-slate-500">{c.email}</td>
                     <td className="py-3 text-sm text-slate-500">{c.phone ?? '—'}</td>
                     <td className="py-3 text-sm text-slate-400">{new Date(c.createdAt).toLocaleDateString()}</td>
                     <td className="py-3">
                       <div className="flex gap-2 justify-end">
-                        <button onClick={() => openEdit(c)} className="text-slate-400 hover:text-blue-500 transition-colors"><Pencil size={15} /></button>
-                        <button onClick={() => { if (confirm('Delete?')) deleteClient.mutate(c.id) }}
+                        <button onClick={(e) => { e.stopPropagation(); openEdit(c) }} className="text-slate-400 hover:text-blue-500 transition-colors"><Pencil size={15} /></button>
+                        <button onClick={(e) => { e.stopPropagation(); if (confirm('Delete?')) deleteClient.mutate(c.id) }}
                           className="text-slate-400 hover:text-red-500 transition-colors"><Trash2 size={15} /></button>
                       </div>
                     </td>

@@ -14,4 +14,10 @@ router.post("/", validate(createClientSchema), clientController.create);
 router.put("/:id", validate(updateClientSchema), clientController.update);
 router.delete("/:id", clientController.delete);
 
+router.get("/:id/positions", clientController.getPositions);
+router.post("/:id/positions", clientController.addPosition);
+router.delete("/:id/positions/:positionId", clientController.removePosition);
+
+router.get("/:id/transactions", clientController.getTransactions);
+
 export default router;

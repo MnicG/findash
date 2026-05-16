@@ -8,6 +8,7 @@ import Clients from './pages/Clients'
 import Stocks from './pages/Stocks'
 import Quotes from './pages/Quotes'
 import News from './pages/News'
+import ClientDetail from './pages/Clients/[id]'
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth()
@@ -28,6 +29,8 @@ export default function App() {
           <Route path="stocks" element={<Stocks />} />
           <Route path="quotes" element={<Quotes />} />
           <Route path="news" element={<News />} />
+          <Route path="/clients/:id" element={<PrivateRoute><ClientDetail /></PrivateRoute>} />
+
         </Route>
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>

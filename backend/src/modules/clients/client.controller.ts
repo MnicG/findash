@@ -11,23 +11,42 @@ export const clientController = {
   }),
 
   getById: asyncHandler(async (req: AuthRequest, res: Response) => {
-  const client = await clientService.getById(req.params.id as string, req.userId!);
-  res.json(client);
-}),
+    const client = await clientService.getById(req.params['id'] as string, req.userId!);
+    res.json(client);
+  }),
 
   create: asyncHandler(async (req: AuthRequest, res: Response) => {
-    const data: CreateClientInput = req.body;
-    const client = await clientService.create(data, req.userId!);
+    const client = await clientService.create(req.body as CreateClientInput, req.userId!);
     res.status(201).json(client);
   }),
 
   update: asyncHandler(async (req: AuthRequest, res: Response) => {
-  const data: UpdateClientInput = req.body;
-  const client = await clientService.update(req.params.id as string, data, req.userId!);
-  res.json(client);
-}),
+    const client = await clientService.update(req.params['id'] as string, req.body as UpdateClientInput, req.userId!);
+    res.json(client);
+  }),
+
   delete: asyncHandler(async (req: AuthRequest, res: Response) => {
-  await clientService.delete(req.params.id as string, req.userId!);
-  res.status(204).send();
-}),
+    await clientService.delete(req.params['id'] as string, req.userId!);
+    res.status(204).send();
+  }),
+
+  getPositions: asyncHandler(async (req: AuthRequest, res: Response) => {
+    const positions = await clientService.getPositions(req.params['id'] as string, req.userId!);
+    res.json(positions);
+  }),
+
+  addPosition: asyncHandler(async (req: AuthRequest, res: Response) => {
+    const position = await clientService.addPosition(req.params['id'] as string, req.userId!, req.body);
+    res.status(201).json(position);
+  }),
+
+  removePosition: asyncHandler(async (req: AuthRequest, res: Response) => {
+    await clientService.removePosition(req.params['id'] as string, req.params['positionId'] as string, req.userId!);
+    res.status(204).send();
+  }),
+
+  getTransactions: asyncHandler(async (req: AuthRequest, res: Response) => {
+    const transactions = await clientService.getTransactions(req.params['id'] as string, req.userId!);
+    res.json(transactions);
+  }),
 };

@@ -1,9 +1,44 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { clientsApi } from '../api/clients.api'
 import { stocksApi } from '../api/stocks.api'
 import { quotesApi } from '../api/quotes.api'
 import { newsApi } from '../api/news.api'
 import type { Client } from '../types'
+import { clientsApi } from '../api/clients.api'
+import type { Position } from '../types'
+
+export const useClientPositions = (clientId: string) =>
+  useQuery({
+    queryKey: ['positions', clientId],
+    queryFn: () => clientsApi.getPositions(clientId),
+    enabled: !!clientId,
+  })
+
+export const useAddPosition = (clientId: string) => {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (data: Omit<Position, 'id' | 'createdAt' | 'clientId'>) =>
+      clientsApi.addPosition(clientId, data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['positions', clientId] })
+      qc.invalidateQueries({ queryKey: ['transactions', clientId] })
+    },
+  })
+}
+
+export const useRemovePosition = (clientId: string) => {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (positionId: string) => clientsApi.removePosition(clientId, positionId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['positions', clientId] }),
+  })
+}
+
+export const useClientTransactions = (clientId: string) =>
+  useQuery({
+    queryKey: ['transactions', clientId],
+    queryFn: () => clientsApi.getTransactions(clientId),
+    enabled: !!clientId,
+  })
 
 export const useClients = () =>
   useQuery({ queryKey: ['clients'], queryFn: clientsApi.getAll })

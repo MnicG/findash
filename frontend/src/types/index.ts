@@ -48,3 +48,24 @@ export interface NewsArticle {
   publishedAt: string
   urlToImage: string | null
 }
+
+export interface Position {
+  id: string
+  symbol: string
+  name: string
+  quantity: number
+  avgBuyPrice: number
+  createdAt: string
+  clientId: string
+}
+
+export interface Transaction {
+  id: string
+  symbol: string
+  name: string
+  type: 'buy' | 'sell'
+  quantity: number
+  price: number
+  date: string
+  clientId: string
+}
