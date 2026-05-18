@@ -17,9 +17,4 @@ export const stocksController = {
     res.json(history);
   }),
 
-  search: asyncHandler(async (req: AuthRequest, res: Response) => {
-    const { q } = req.query;
-    const results = await stocksService.search(q as string);
-    res.json(results);
-  }),
 };

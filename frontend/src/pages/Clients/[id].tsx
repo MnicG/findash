@@ -6,7 +6,6 @@ import { useClientPositions, useAddPosition, useRemovePosition, useClientTransac
 import { stocksApi } from '../../api/stocks.api'
 import Card from '../../components/ui/Card'
 import { ArrowLeft, Plus, Trash2, X, TrendingUp, TrendingDown } from 'lucide-react'
-import api from '../../api/axios'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 
 const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#f97316']
@@ -45,15 +44,22 @@ export default function ClientDetail() {
   })
 
   useEffect(() => {
-    if (search.length < 1) { setSuggestions([]); return }
-    const t = setTimeout(async () => {
-      try {
-        const res = await api.get(`/stocks/search?q=${search}`)
-        setSuggestions(res.data)
-      } catch { setSuggestions([]) }
-    }, 300)
-    return () => clearTimeout(t)
-  }, [search])
+  if (search.length < 1) { setSuggestions([]); return }
+  const t = setTimeout(async () => {
+    try {
+      const res = await fetch(
+        `https://query1.finance.yahoo.com/v1/finance/search?q=${search}&quotesCount=6&newsCount=0`
+      )
+      const data = await res.json()
+      setSuggestions(
+        (data.quotes || [])
+          .filter((q: any) => q.symbol)
+          .map((q: any) => ({ symbol: q.symbol, name: q.longname || q.shortname || q.symbol }))
+      )
+    } catch { setSuggestions([]) }
+  }, 300)
+  return () => clearTimeout(t)
+}, [search])
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {

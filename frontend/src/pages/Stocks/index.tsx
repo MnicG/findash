@@ -3,7 +3,6 @@ import { useStockQuote, useStockHistory } from '../../hooks'
 import Card from '../../components/ui/Card'
 import { Search, TrendingUp, TrendingDown } from 'lucide-react'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
-import api from '../../api/axios'
 
 const POPULAR = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'PETR4.SA', 'VALE3.SA']
 const RANGES = ['1d', '1mo', '3mo', '6mo', '1y']
@@ -20,16 +19,23 @@ export default function Stocks() {
   const { data: history, isLoading: histLoading } = useStockHistory(symbol, range)
 
   useEffect(() => {
-    if (search.length < 1) { setSuggestions([]); return }
-    const t = setTimeout(async () => {
-      try {
-        const res = await api.get(`/stocks/search?q=${search}`)
-        setSuggestions(res.data)
-        setShowSuggestions(true)
-      } catch { setSuggestions([]) }
-    }, 300)
-    return () => clearTimeout(t)
-  }, [search])
+  if (search.length < 1) { setSuggestions([]); setShowSuggestions(false); return }
+  const t = setTimeout(async () => {
+    try {
+      const res = await fetch(
+        `https://query1.finance.yahoo.com/v1/finance/search?q=${search}&quotesCount=6&newsCount=0`
+      )
+      const data = await res.json()
+      setSuggestions(
+        (data.quotes || [])
+          .filter((q: any) => q.symbol)
+          .map((q: any) => ({ symbol: q.symbol, name: q.longname || q.shortname || q.symbol }))
+      )
+      setShowSuggestions(true)
+    } catch { setSuggestions([]) }
+  }, 300)
+  return () => clearTimeout(t)
+}, [search])
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
