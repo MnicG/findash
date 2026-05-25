@@ -35,14 +35,18 @@ export default function ClientDetail() {
 
   // fetch live prices for all positions
   const { data: quotes } = useQuery({
-    queryKey: ['position-quotes', positions.map(p => p.symbol)],
-    queryFn: async () => {
-      const results = await Promise.all(positions.map(p => stocksApi.getQuote(p.symbol)))
-      return Object.fromEntries(results.map(q => [q.symbol, q]))
-    },
-    enabled: positions.length > 0,
-    refetchInterval: 60000,
-  })
+  queryKey: ['position-quotes', positions.map(p => p.symbol)],
+  queryFn: async () => {
+    const results = await Promise.allSettled(positions.map(p => stocksApi.getQuote(p.symbol)))
+    return Object.fromEntries(
+      results
+        .map((r, i) => [positions[i].symbol, r.status === 'fulfilled' ? r.value : null])
+        .filter(([, v]) => v !== null)
+    )
+  },
+  enabled: positions.length > 0,
+  refetchInterval: 60000,
+})
 
   useEffect(() => {
   if (search.length < 1) { setSuggestions([]); return }
@@ -151,7 +155,7 @@ export default function ClientDetail() {
                 </thead>
                 <tbody>
                   {positions.map(p => {
-                    const currentPrice = quotes?.[p.symbol]?.price ?? p.avgBuyPrice
+                    const currentPrice = (quotes?.[p.symbol]?.price) || p.avgBuyPrice
                     const value = currentPrice * p.quantity
                     const gain = (currentPrice - p.avgBuyPrice) * p.quantity
                     const gainPct = ((currentPrice - p.avgBuyPrice) / p.avgBuyPrice) * 100
