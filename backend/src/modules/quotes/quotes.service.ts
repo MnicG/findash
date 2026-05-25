@@ -1,4 +1,4 @@
-import { httpClient } from "../../utils/httpClient";
+import axios from "axios";
 import { ApiError } from "../../utils/ApiError";
 
 const FMP = "https://financialmodelingprep.com/stable";
@@ -7,15 +7,12 @@ export const quotesService = {
   async getRate(from: string, to: string) {
     const key = process.env.FMP_API_KEY;
     try {
-      // FMP forex uses format like EURUSD, not USDBRL directly
-      // Try the forex endpoint instead
-      const { data } = await httpClient.get(
+      const { data } = await axios.get(
         `${FMP}/quote?symbol=${from}${to}&apikey=${key}`
       );
       console.log('FMP forex response:', JSON.stringify(data).slice(0, 200));
       const q = Array.isArray(data) ? data[0] : null;
       if (!q || q.price === undefined) {
-        // Return a fallback so the app doesn't crash
         return { from, to, rate: 0, previousClose: 0, change: 0, changePercent: 0 };
       }
       return {
@@ -26,8 +23,8 @@ export const quotesService = {
         change: q.change ?? 0,
         changePercent: q.changesPercentage ?? 0,
       };
-    } catch (error) {
-      console.error('Forex error:', error);
+    } catch (error: any) {
+      console.error('Forex error raw:', error?.response?.data);
       return { from, to, rate: 0, previousClose: 0, change: 0, changePercent: 0 };
     }
   },
