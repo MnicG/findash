@@ -2,8 +2,18 @@ import api from './axios'
 import type { ExchangeRate } from '../types'
 
 export const quotesApi = {
-  getRate: async (from: string, to: string): Promise<ExchangeRate> => {
-    const { data } = await api.get(`/quotes/${from}/${to}`)
-    return data
-  },
+  async getRate(from: string, to: string) {
+    const res = await fetch(`https://api.exchangerate-api.com/v4/latest/${from}`)
+    const data = await res.json()
+    const rate = data.rates[to]
+    if (!rate) throw new Error('Rate not found')
+    return {
+      from,
+      to,
+      rate,
+      previousClose: rate,
+      change: 0,
+      changePercent: 0,
+    }
+  }
 }
