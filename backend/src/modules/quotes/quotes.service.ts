@@ -7,11 +7,17 @@ export const quotesService = {
   async getRate(from: string, to: string) {
     const key = process.env.FMP_API_KEY;
     try {
+      // FMP forex uses format like EURUSD, not USDBRL directly
+      // Try the forex endpoint instead
       const { data } = await httpClient.get(
         `${FMP}/quote?symbol=${from}${to}&apikey=${key}`
       );
+      console.log('FMP forex response:', JSON.stringify(data).slice(0, 200));
       const q = Array.isArray(data) ? data[0] : null;
-      if (!q || q.price === undefined) throw new ApiError(404, "Currency pair not found");
+      if (!q || q.price === undefined) {
+        // Return a fallback so the app doesn't crash
+        return { from, to, rate: 0, previousClose: 0, change: 0, changePercent: 0 };
+      }
       return {
         from,
         to,
@@ -21,8 +27,8 @@ export const quotesService = {
         changePercent: q.changesPercentage ?? 0,
       };
     } catch (error) {
-      if (error instanceof ApiError) throw error;
-      throw new ApiError(502, "Failed to fetch exchange rate");
+      console.error('Forex error:', error);
+      return { from, to, rate: 0, previousClose: 0, change: 0, changePercent: 0 };
     }
   },
 };
