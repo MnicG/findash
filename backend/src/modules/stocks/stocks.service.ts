@@ -9,16 +9,15 @@ export const stocksService = {
     try {
       const { data } = await httpClient.get(`${FMP}/quote?symbol=${symbol}&apikey=${key}`);
       const q = data[0];
-      if (!q) throw new ApiError(404, "Stock not found");
+      if (!q || q.price == null) throw new ApiError(404, "Stock not found");
       return {
     symbol: q.symbol,
     name: q.name,
-    price: Number(q.price),
-    previousClose: Number(q.previousClose),
-    change: Number(q.change),
-    changePercent: Number(q.changesPercentage),
+    change: Number(q.change) || 0,
+    changePercent: Number(q.changesPercentage) || 0,
     currency: q.currency || 'USD',
     exchange: q.exchange,
+    
       };
     } catch (error) {
       if (error instanceof ApiError) throw error;

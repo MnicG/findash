@@ -155,7 +155,7 @@ export default function ClientDetail() {
                 </thead>
                 <tbody>
                   {positions.map(p => {
-                    const currentPrice = (quotes?.[p.symbol]?.price) || p.avgBuyPrice
+                    const currentPrice = (quotes?.[p.symbol]?.price || p.avgBuyPrice) as number
                     const value = currentPrice * p.quantity
                     const gain = (currentPrice - p.avgBuyPrice) * p.quantity
                     const gainPct = ((currentPrice - p.avgBuyPrice) / p.avgBuyPrice) * 100
