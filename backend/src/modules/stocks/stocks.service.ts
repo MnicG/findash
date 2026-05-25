@@ -11,12 +11,14 @@ export const stocksService = {
       const q = data[0];
       if (!q || q.price == null) throw new ApiError(404, "Stock not found");
       return {
-    symbol: q.symbol,
-    name: q.name,
-    change: Number(q.change) || 0,
-    changePercent: Number(q.changesPercentage) || 0,
-    currency: q.currency || 'USD',
-    exchange: q.exchange,
+  symbol: q.symbol,
+  name: q.name,
+  price: Number(q.price) || 0,
+  previousClose: Number(q.previousClose) || 0,
+  change: Number(q.change) || 0,
+  changePercent: Number(q.changePercentage) || 0,
+  currency: q.currency || 'USD',
+  exchange: q.exchange,
     
       };
     } catch (error) {
