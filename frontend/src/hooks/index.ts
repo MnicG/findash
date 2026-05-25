@@ -71,19 +71,26 @@ export const useDeleteClient = () => {
 export const useStockQuote = (symbol: string) =>
   useQuery({
     queryKey: ['stock', symbol],
-    queryFn: () => stocksApi.getQuote(symbol),
+    queryFn: async () => {
+      try {
+        return await stocksApi.getQuote(symbol)
+      } catch {
+        return null
+      }
+    },
     enabled: !!symbol,
-    throwOnError: false,
-    retry: false,
   })
-
 export const useExchangeRate = (from: string, to: string) =>
   useQuery({
     queryKey: ['rate', from, to],
-    queryFn: () => quotesApi.getRate(from, to),
+    queryFn: async () => {
+      try {
+        return await quotesApi.getRate(from, to)
+      } catch {
+        return { from, to, rate: 0, previousClose: 0, change: 0, changePercent: 0 }
+      }
+    },
     enabled: !!from && !!to,
-    throwOnError: false,
-    retry: false,
   })
 
 export const useStockHistory = (symbol: string, range = '1mo') =>
