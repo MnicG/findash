@@ -1,6 +1,3 @@
-import api from './axios'
-import type { ExchangeRate } from '../types'
-
 export const quotesApi = {
   async getRate(from: string, to: string) {
     const res = await fetch(`https://api.exchangerate-api.com/v4/latest/${from}`)
