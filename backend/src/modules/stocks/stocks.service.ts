@@ -2,10 +2,10 @@ import { httpClient } from "../../utils/httpClient";
 import { ApiError } from "../../utils/ApiError";
 
 const FMP = "https://financialmodelingprep.com/api/v3";
-const key = process.env.FMP_API_KEY;
 
 export const stocksService = {
   async getQuote(symbol: string) {
+    const key = process.env.FMP_API_KEY;
     try {
       const { data } = await httpClient.get(`${FMP}/quote/${symbol}?apikey=${key}`);
       const q = data[0];
@@ -27,6 +27,7 @@ export const stocksService = {
   },
 
   async getHistory(symbol: string, range: string = "1mo") {
+    const key = process.env.FMP_API_KEY;
     try {
       const rangeMap: Record<string, number> = {
         "1d": 1, "1mo": 35, "3mo": 90, "6mo": 180, "1y": 365,
@@ -61,6 +62,7 @@ export const stocksService = {
   },
 
   async search(query: string) {
+    const key = process.env.FMP_API_KEY;
     try {
       const { data } = await httpClient.get(
         `${FMP}/search?query=${query}&limit=8&apikey=${key}`
