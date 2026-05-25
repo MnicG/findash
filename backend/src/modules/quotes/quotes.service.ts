@@ -1,30 +1,24 @@
 import { httpClient } from "../../utils/httpClient";
 import { ApiError } from "../../utils/ApiError";
 
+const FMP = "https://financialmodelingprep.com/api/v3";
+const key = process.env.FMP_API_KEY;
+
 export const quotesService = {
   async getRate(from: string, to: string) {
     try {
-      const symbol = `${from}${to}=X`;
-      const response = await httpClient.get(
-        `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}`,
-        { params: { interval: "1d", range: "1d" } }
+      const { data } = await httpClient.get(
+        `${FMP}/fx/${from}${to}?apikey=${key}`
       );
-
-      const result = response.data.chart.result[0];
-      if (!result) throw new ApiError(404, "Currency pair not found");
-
-      const meta = result.meta;
-
+      const q = data[0];
+      if (!q) throw new ApiError(404, "Currency pair not found");
       return {
         from,
         to,
-        rate: meta.regularMarketPrice,
-        previousClose: meta.chartPreviousClose,
-        change: meta.regularMarketPrice - meta.chartPreviousClose,
-        changePercent:
-          ((meta.regularMarketPrice - meta.chartPreviousClose) /
-            meta.chartPreviousClose) *
-          100,
+        rate: q.ask,
+        previousClose: q.open,
+        change: q.ask - q.open,
+        changePercent: ((q.ask - q.open) / q.open) * 100,
       };
     } catch (error) {
       if (error instanceof ApiError) throw error;
