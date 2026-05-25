@@ -1,5 +1,5 @@
 import { useAuth } from '../../contexts/AuthContext'
-import { useClients, useStockQuote, useExchangeRate, useTopNews } from '../../hooks'
+import { useClients, useExchangeRate, useTopNews } from '../../hooks'
 import Card from '../../components/ui/Card'
 import { TrendingUp, TrendingDown } from 'lucide-react'
 
@@ -23,7 +23,6 @@ function StatCard({ title, value, sub, positive }: {
 export default function Dashboard() {
   const { user } = useAuth()
   const { data: clients } = useClients()
-  const { data: aapl } = useStockQuote('AAPL')
   const { data: usdBrl } = useExchangeRate('USD', 'BRL')
   const { data: news, isLoading: newsLoading } = useTopNews()
 
@@ -36,9 +35,6 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatCard title="Total Clients" value={String(clients?.length ?? 0)} sub="Registered clients" />
-        <StatCard title="AAPL" value={aapl ? `$${aapl.price.toFixed(2)}` : '—'}
-          sub={aapl ? `${aapl.changePercent >= 0 ? '+' : ''}${aapl.changePercent.toFixed(2)}%` : 'Loading...'}
-          positive={aapl ? aapl.changePercent >= 0 : undefined} />
         <StatCard title="USD/BRL" value={usdBrl ? `R$ ${usdBrl.rate.toFixed(4)}` : '—'}
           sub={usdBrl ? `${usdBrl.changePercent >= 0 ? '+' : ''}${usdBrl.changePercent.toFixed(4)}%` : 'Loading...'}
           positive={usdBrl ? usdBrl.changePercent >= 0 : undefined} />
@@ -54,7 +50,7 @@ export default function Dashboard() {
                 <div key={c.id} className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
                   <div>
                     <p className="text-sm font-medium text-slate-700">{c.name}</p>
-                    <p className="text-xs text-slate-400">{c.email}</p>
+                    <p className="text-xs text-slate.400">{c.email}</p>
                   </div>
                   <span className="text-xs text-slate-400">{new Date(c.createdAt).toLocaleDateString()}</span>
                 </div>
