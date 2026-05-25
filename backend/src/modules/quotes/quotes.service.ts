@@ -10,15 +10,15 @@ export const quotesService = {
       const { data } = await httpClient.get(
         `${FMP}/quote?symbol=${from}${to}&apikey=${key}`
       );
-      const q = data[0];
-      if (!q) throw new ApiError(404, "Currency pair not found");
+      const q = Array.isArray(data) ? data[0] : null;
+      if (!q || q.price === undefined) throw new ApiError(404, "Currency pair not found");
       return {
         from,
         to,
-        rate: q.price,
-        previousClose: q.previousClose,
-        change: q.change,
-        changePercent: q.changesPercentage,
+        rate: q.price ?? 0,
+        previousClose: q.previousClose ?? 0,
+        change: q.change ?? 0,
+        changePercent: q.changesPercentage ?? 0,
       };
     } catch (error) {
       if (error instanceof ApiError) throw error;
