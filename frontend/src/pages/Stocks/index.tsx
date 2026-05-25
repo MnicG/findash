@@ -20,16 +20,16 @@ export default function Stocks() {
   const { data: history, isLoading: histLoading } = useStockHistory(symbol, range)
 
   useEffect(() => {
-  if (search.length < 1) { setSuggestions([]); setShowSuggestions(false); return }
-  const t = setTimeout(async () => {
-    try {
-      const res = await api.get(`/stocks/search?q=${search}`)
-      setSuggestions(res.data)
-      setShowSuggestions(true)
-    } catch { setSuggestions([]) }
-  }, 300)
-  return () => clearTimeout(t)
-}, [search])
+    if (search.length < 1) { setSuggestions([]); setShowSuggestions(false); return }
+    const t = setTimeout(async () => {
+      try {
+        const res = await api.get(`/stocks/search?q=${search}`)
+        setSuggestions(res.data)
+        setShowSuggestions(true)
+      } catch { setSuggestions([]) }
+    }, 300)
+    return () => clearTimeout(t)
+  }, [search])
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -93,65 +93,70 @@ export default function Stocks() {
         ))}
       </div>
 
-      {quoteLoading ? <p className="text-slate-400 text-sm">Loading...</p> : quote ? (
-        <>
-          <Card className="mb-6">
-            <div className="flex items-start justify-between">
-              <div>
-                <div className="flex items-center gap-3 mb-1">
-                  <h2 className="text-2xl font-bold text-slate-800">{quote.symbol}</h2>
-                  <span className="text-sm text-slate-400">{quote.exchange}</span>
-                </div>
-                <p className="text-slate-500 text-sm mb-4">{quote.name}</p>
-                <p className="text-4xl font-bold text-slate-800">
-                  {quote.currency === 'BRL' ? 'R$' : '$'} {quote.price.toFixed(2)}
-                </p>
-              </div>
-              <div className={`flex items-center gap-2 text-lg font-semibold ${quote.changePercent >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-                {quote.changePercent >= 0 ? <TrendingUp size={20} /> : <TrendingDown size={20} />}
-                {quote.changePercent >= 0 ? '+' : ''}{quote.changePercent.toFixed(2)}%
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4 mt-6 pt-6 border-t border-slate-100">
-              <div>
-                <p className="text-xs text-slate-400">Previous Close</p>
-                <p className="text-sm font-semibold text-slate-700">{quote.previousClose.toFixed(2)}</p>
-              </div>
-              <div>
-                <p className="text-xs text-slate-400">Change</p>
-                <p className={`text-sm font-semibold ${quote.change >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-                  {quote.change >= 0 ? '+' : ''}{quote.change.toFixed(2)}
-                </p>
-              </div>
-            </div>
-          </Card>
-
-          <Card>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="font-semibold text-slate-700">Price History</h3>
-              <div className="flex gap-1">
-                {RANGES.map((r) => (
-                  <button key={r} onClick={() => setRange(r)}
-                    className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-                      range === r ? 'bg-emerald-500 text-white' : 'text-slate-500 hover:bg-slate-100'
-                    }`}>{r}</button>
-                ))}
-              </div>
-            </div>
-            {histLoading ? <p className="text-slate-400 text-sm">Loading chart...</p> : (
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={history}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                  <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} domain={['auto', 'auto']} />
-                  <Tooltip contentStyle={{ border: '1px solid #e2e8f0', borderRadius: 8, fontSize: 12 }} />
-                  <Line type="monotone" dataKey="close" stroke="#10b981" strokeWidth={2} dot={false} />
-                </LineChart>
-              </ResponsiveContainer>
-            )}
-          </Card>
-        </>
-      ) : <p className="text-slate-400 text-sm">Symbol not found.</p>}
+     {quoteLoading ? (
+  <p className="text-slate-400 text-sm">Loading...</p>
+) : quote && quote.price != null ? (<>
+  <Card className="mb-6">
+    <div className="flex items-start justify-between">
+      <div>
+        <div className="flex items-center gap-3 mb-1">
+          <h2 className="text-2xl font-bold text-slate-800">{quote.symbol}</h2>
+          <span className="text-sm text-slate-400">{quote.exchange}</span>
+        </div>
+        <p className="text-slate-500 text-sm mb-4">{quote.name}</p>
+        <p className="text-4xl font-bold text-slate-800">
+          {quote.currency === 'BRL' ? 'R$' : '$'} {quote.price.toFixed(2)}
+        </p>
+      </div>
+      <div className={`flex items-center gap-2 text-lg font-semibold ${quote.changePercent >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+        {quote.changePercent >= 0 ? <TrendingUp size={20} /> : <TrendingDown size={20} />}
+        {quote.changePercent >= 0 ? '+' : ''}{quote.changePercent.toFixed(2)}%
+      </div>
     </div>
+    <div className="grid grid-cols-2 gap-4 mt-6 pt-6 border-t border-slate-100">
+      <div>
+        <p className="text-xs text-slate-400">Previous Close</p>
+        <p className="text-sm font-semibold text-slate-700">{quote.previousClose.toFixed(2)}</p>
+      </div>
+      <div>
+        <p className="text-xs text-slate-400">Change</p>
+        <p className={`text-sm font-semibold ${quote.change >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+          {quote.change >= 0 ? '+' : ''}{quote.change.toFixed(2)}
+        </p>
+      </div>
+    </div>
+  </Card>
+
+  <Card>
+    <div className="flex items-center justify-between mb-6">
+      <h3 className="font-semibold text-slate-700">Price History</h3>
+      <div className="flex gap-1">
+        {RANGES.map((r) => (
+          <button key={r} onClick={() => setRange(r)}
+            className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+              range === r ? 'bg-emerald-500 text-white' : 'text-slate-500 hover:bg-slate-100'
+            }`}>{r}</button>
+        ))}
+      </div>
+    </div>
+    {histLoading ? (
+      <p className="text-slate-400 text-sm">Loading chart...</p>
+    ) : (
+      <ResponsiveContainer width="100%" height={300}>
+        <LineChart data={history}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+          <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} />
+          <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} domain={['auto', 'auto']} />
+          <Tooltip contentStyle={{ border: '1px solid #e2e8f0', borderRadius: 8, fontSize: 12 }} />
+          <Line type="monotone" dataKey="close" stroke="#10b981" strokeWidth={2} dot={false} />
+        </LineChart>
+      </ResponsiveContainer>
+    )}
+  </Card>
+</>) : (
+  <p className="text-slate-400 text-sm">Symbol not found.</p>
+)}
+
+ </div>
   )
 }

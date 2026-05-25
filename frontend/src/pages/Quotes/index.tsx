@@ -5,7 +5,7 @@ import { TrendingUp, TrendingDown, ArrowRightLeft } from 'lucide-react'
 
 const PAIRS = [
   { from: 'USD', to: 'BRL' }, { from: 'EUR', to: 'BRL' },
-  { from: 'EUR', to: 'USD' }, { from: 'GBP', to: 'USD' }, { from: 'BTC', to: 'USD' },
+  { from: 'EUR', to: 'USD' }, { from: 'GBP', to: 'USD' },
 ]
 
 function RateCard({ from, to }: { from: string; to: string }) {
