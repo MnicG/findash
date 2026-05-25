@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import api from '../../api/axios'
 import { useStockQuote, useStockHistory } from '../../hooks'
 import Card from '../../components/ui/Card'
 import { Search, TrendingUp, TrendingDown } from 'lucide-react'
@@ -22,15 +23,8 @@ export default function Stocks() {
   if (search.length < 1) { setSuggestions([]); setShowSuggestions(false); return }
   const t = setTimeout(async () => {
     try {
-      const res = await fetch(
-        `https://query1.finance.yahoo.com/v1/finance/search?q=${search}&quotesCount=6&newsCount=0`
-      )
-      const data = await res.json()
-      setSuggestions(
-        (data.quotes || [])
-          .filter((q: any) => q.symbol)
-          .map((q: any) => ({ symbol: q.symbol, name: q.longname || q.shortname || q.symbol }))
-      )
+      const res = await api.get(`/stocks/search?q=${search}`)
+      setSuggestions(res.data)
       setShowSuggestions(true)
     } catch { setSuggestions([]) }
   }, 300)

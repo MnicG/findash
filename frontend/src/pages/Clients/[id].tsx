@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import api from '../../api/axios'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { clientsApi } from '../../api/clients.api'
@@ -47,15 +48,8 @@ export default function ClientDetail() {
   if (search.length < 1) { setSuggestions([]); return }
   const t = setTimeout(async () => {
     try {
-      const res = await fetch(
-        `https://query1.finance.yahoo.com/v1/finance/search?q=${search}&quotesCount=6&newsCount=0`
-      )
-      const data = await res.json()
-      setSuggestions(
-        (data.quotes || [])
-          .filter((q: any) => q.symbol)
-          .map((q: any) => ({ symbol: q.symbol, name: q.longname || q.shortname || q.symbol }))
-      )
+      const res = await api.get(`/stocks/search?q=${search}`)
+      setSuggestions(res.data)
     } catch { setSuggestions([]) }
   }, 300)
   return () => clearTimeout(t)

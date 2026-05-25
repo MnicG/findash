@@ -58,5 +58,26 @@ export const stocksService = {
   }
 },
 
+async search(query: string) {
+  try {
+    const response = await httpClient.get(
+      `https://financialmodelingprep.com/api/v3/search`,
+      {
+        params: {
+          query,
+          limit: 8,
+          apikey: process.env.FMP_API_KEY,
+        }
+      }
+    );
+    return (response.data || []).map((q: any) => ({
+      symbol: q.symbol,
+      name: q.name,
+    }));
+  } catch (error) {
+    throw new ApiError(502, "Failed to search stocks");
+  }
+},
+
 
 };
