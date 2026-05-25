@@ -73,6 +73,17 @@ export const useStockQuote = (symbol: string) =>
     queryKey: ['stock', symbol],
     queryFn: () => stocksApi.getQuote(symbol),
     enabled: !!symbol,
+    throwOnError: false,
+    retry: false,
+  })
+
+export const useExchangeRate = (from: string, to: string) =>
+  useQuery({
+    queryKey: ['rate', from, to],
+    queryFn: () => quotesApi.getRate(from, to),
+    enabled: !!from && !!to,
+    throwOnError: false,
+    retry: false,
   })
 
 export const useStockHistory = (symbol: string, range = '1mo') =>
@@ -82,12 +93,6 @@ export const useStockHistory = (symbol: string, range = '1mo') =>
     enabled: !!symbol,
   })
 
-export const useExchangeRate = (from: string, to: string) =>
-  useQuery({
-    queryKey: ['rate', from, to],
-    queryFn: () => quotesApi.getRate(from, to),
-    enabled: !!from && !!to,
-  })
 
 export const useTopNews = () =>
   useQuery({ queryKey: ['news-top'], queryFn: newsApi.getTop })
