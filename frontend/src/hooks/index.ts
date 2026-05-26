@@ -2,9 +2,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { stocksApi } from '../api/stocks.api'
 import { quotesApi } from '../api/quotes.api'
 import { newsApi } from '../api/news.api'
-import type { Client } from '../types'
+import type { Client, Position } from '../types'
 import { clientsApi } from '../api/clients.api'
-import type { Position } from '../types'
 
 export const useClientPositions = (clientId: string) =>
   useQuery({
@@ -21,6 +20,7 @@ export const useAddPosition = (clientId: string) => {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['positions', clientId] })
       qc.invalidateQueries({ queryKey: ['transactions', clientId] })
+      qc.invalidateQueries({ queryKey: ['clients-summary'] })
     },
   })
 }
@@ -29,7 +29,10 @@ export const useRemovePosition = (clientId: string) => {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (positionId: string) => clientsApi.removePosition(clientId, positionId),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['positions', clientId] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['positions', clientId] })
+      qc.invalidateQueries({ queryKey: ['clients-summary'] })
+    },
   })
 }
 
@@ -47,7 +50,10 @@ export const useCreateClient = () => {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (data: Partial<Client>) => clientsApi.create(data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['clients'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['clients'] })
+      qc.invalidateQueries({ queryKey: ['clients-summary'] })
+    },
   })
 }
 
@@ -56,7 +62,10 @@ export const useUpdateClient = () => {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<Client> }) =>
       clientsApi.update(id, data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['clients'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['clients'] })
+      qc.invalidateQueries({ queryKey: ['clients-summary'] })
+    },
   })
 }
 
@@ -64,7 +73,10 @@ export const useDeleteClient = () => {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (id: string) => clientsApi.delete(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['clients'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['clients'] })
+      qc.invalidateQueries({ queryKey: ['clients-summary'] })
+    },
   })
 }
 
@@ -72,14 +84,11 @@ export const useStockQuote = (symbol: string) =>
   useQuery({
     queryKey: ['stock', symbol],
     queryFn: async () => {
-      try {
-        return await stocksApi.getQuote(symbol)
-      } catch {
-        return null
-      }
+      try { return await stocksApi.getQuote(symbol) } catch { return null }
     },
     enabled: !!symbol,
   })
+
 export const useExchangeRate = (from: string, to: string) =>
   useQuery({
     queryKey: ['rate', from, to],
@@ -100,7 +109,6 @@ export const useStockHistory = (symbol: string, range = '1mo') =>
     enabled: !!symbol,
   })
 
-
 export const useTopNews = () =>
   useQuery({ queryKey: ['news-top'], queryFn: newsApi.getTop })
 
@@ -109,4 +117,66 @@ export const useSearchNews = (q: string) =>
     queryKey: ['news-search', q],
     queryFn: () => newsApi.search(q),
     enabled: !!q,
+  })
+
+// Fetches all clients with positions, then live prices for all unique symbols
+export const useDashboardSummary = () =>
+  useQuery({
+    queryKey: ['clients-summary'],
+    queryFn: async () => {
+      const clients = await clientsApi.getSummary()
+
+      // Collect unique symbols across all clients
+      const symbols = [...new Set(clients.flatMap(c => c.portfolio.map(p => p.symbol)))]
+
+      // Fetch all live prices in parallel
+      const results = await Promise.allSettled(symbols.map(s => stocksApi.getQuote(s)))
+      const prices: Record<string, { price: number; changePercent: number }> = {}
+      results.forEach((r, i) => {
+        if (r.status === 'fulfilled' && r.value) {
+          prices[symbols[i]] = { price: r.value.price, changePercent: r.value.changePercent }
+        }
+      })
+
+      // Enrich each client
+      const enriched = clients.map(client => {
+        const totalCost = client.portfolio.reduce((s, p) => s + p.avgBuyPrice * p.quantity, 0)
+        const totalValue = client.portfolio.reduce((s, p) => {
+          const price = prices[p.symbol]?.price ?? p.avgBuyPrice
+          return s + price * p.quantity
+        }, 0)
+        const gainPct = totalCost > 0 ? ((totalValue - totalCost) / totalCost) * 100 : 0
+
+        // Weighted daily change: sum(positionValue * changePercent) / totalValue
+        const dailyChangePct = totalValue > 0
+          ? client.portfolio.reduce((s, p) => {
+              const price = prices[p.symbol]?.price ?? p.avgBuyPrice
+              const weight = (price * p.quantity) / totalValue
+              return s + (prices[p.symbol]?.changePercent ?? 0) * weight
+            }, 0)
+          : 0
+
+        return {
+          ...client,
+          totalValue,
+          totalCost,
+          gainPct,
+          dailyChangePct,
+          positionCount: client.portfolio.length,
+        }
+      })
+
+      const totalAUM = enriched.reduce((s, c) => s + c.totalValue, 0)
+      const clientsUp = enriched.filter(c => c.dailyChangePct > 0).length
+      const clientsDown = enriched.filter(c => c.dailyChangePct < 0).length
+
+      const riskBreakdown = {
+        conservative: clients.filter(c => c.riskProfile === 'conservative').length,
+        moderate: clients.filter(c => !c.riskProfile || c.riskProfile === 'moderate').length,
+        aggressive: clients.filter(c => c.riskProfile === 'aggressive').length,
+      }
+
+      return { clients: enriched, totalAUM, clientsUp, clientsDown, riskBreakdown }
+    },
+    refetchInterval: 60000,
   })

@@ -10,9 +10,14 @@ export interface Client {
   email: string
   phone?: string
   document?: string
+  riskProfile?: 'conservative' | 'moderate' | 'aggressive'
   createdAt: string
   updatedAt: string
   userId: string
+}
+
+export interface ClientWithPositions extends Client {
+  portfolio: Position[]
 }
 
 export interface StockQuote {

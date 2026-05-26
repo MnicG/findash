@@ -1,5 +1,5 @@
 import api from './axios'
-import type { Client, Position, Transaction } from '../types'
+import type { Client, ClientWithPositions, Position, Transaction } from '../types'
 
 export const clientsApi = {
   getAll: async (): Promise<Client[]> => {
@@ -8,6 +8,10 @@ export const clientsApi = {
   },
   getById: async (id: string): Promise<Client> => {
     const { data } = await api.get(`/clients/${id}`)
+    return data
+  },
+  getSummary: async (): Promise<ClientWithPositions[]> => {
+    const { data } = await api.get('/clients/summary')
     return data
   },
   create: async (payload: Partial<Client>): Promise<Client> => {

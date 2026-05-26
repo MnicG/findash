@@ -8,6 +8,7 @@ const router = Router();
 
 router.use(authMiddleware);
 
+router.get("/summary", clientController.getSummary);   // must be before /:id
 router.get("/", clientController.getAll);
 router.get("/:id", clientController.getById);
 router.post("/", validate(createClientSchema), clientController.create);

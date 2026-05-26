@@ -70,4 +70,15 @@ export const clientService = {
       orderBy: { date: "desc" },
     });
   },
+
+  // Returns all clients with their positions in one query for the dashboard
+  async getSummary(userId: string) {
+    return prisma.client.findMany({
+      where: { userId },
+      include: {
+        portfolio: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  },
 };

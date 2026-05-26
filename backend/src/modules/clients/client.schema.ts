@@ -5,6 +5,7 @@ export const createClientSchema = z.object({
   email: z.string().email("Invalid email"),
   phone: z.string().optional(),
   document: z.string().optional(),
+  riskProfile: z.enum(["conservative", "moderate", "aggressive"]).optional(),
 });
 
 export const updateClientSchema = createClientSchema.partial();

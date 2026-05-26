@@ -49,4 +49,9 @@ export const clientController = {
     const transactions = await clientService.getTransactions(req.params['id'] as string, req.userId!);
     res.json(transactions);
   }),
+
+  getSummary: asyncHandler(async (req: AuthRequest, res: Response) => {
+    const summary = await clientService.getSummary(req.userId!);
+    res.json(summary);
+  }),
 };

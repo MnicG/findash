@@ -5,8 +5,14 @@ import Card from '../../components/ui/Card'
 import { Plus, Pencil, Trash2, X } from 'lucide-react'
 import type { Client } from '../../types'
 
-type FormData = { name: string; email: string; phone: string; document: string }
-const empty: FormData = { name: '', email: '', phone: '', document: '' }
+type FormData = { name: string; email: string; phone: string; document: string; riskProfile: 'conservative' | 'moderate' | 'aggressive' }
+const empty: FormData = { name: '', email: '', phone: '', document: '', riskProfile: 'moderate' }
+
+const RISK_COLORS = {
+  conservative: 'bg-blue-100 text-blue-600',
+  moderate:     'bg-amber-100 text-amber-600',
+  aggressive:   'bg-red-100 text-red-600',
+}
 
 export default function Clients() {
   const navigate = useNavigate()
@@ -21,13 +27,25 @@ export default function Clients() {
   const openCreate = () => { setEditing(null); setForm(empty); setShowModal(true) }
   const openEdit = (c: Client) => {
     setEditing(c)
-    setForm({ name: c.name, email: c.email, phone: c.phone ?? '', document: c.document ?? '' })
+    setForm({
+      name: c.name,
+      email: c.email,
+      phone: c.phone ?? '',
+      document: c.document ?? '',
+      riskProfile: (c.riskProfile as FormData['riskProfile']) ?? 'moderate',
+    })
     setShowModal(true)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const payload = { name: form.name, email: form.email, phone: form.phone || undefined, document: form.document || undefined }
+    const payload = {
+      name: form.name,
+      email: form.email,
+      phone: form.phone || undefined,
+      document: form.document || undefined,
+      riskProfile: form.riskProfile,
+    }
     if (editing) await updateClient.mutateAsync({ id: editing.id, data: payload })
     else await createClient.mutateAsync(payload)
     setShowModal(false)
@@ -52,7 +70,7 @@ export default function Clients() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-slate-100">
-                  {['Name', 'Email', 'Phone', 'Created', ''].map((h) => (
+                  {['Name', 'Email', 'Phone', 'Risk Profile', 'Created', ''].map((h) => (
                     <th key={h} className="text-left text-xs font-medium text-slate-400 pb-3">{h}</th>
                   ))}
                 </tr>
@@ -66,6 +84,11 @@ export default function Clients() {
                     </td>
                     <td className="py-3 text-sm text-slate-500">{c.email}</td>
                     <td className="py-3 text-sm text-slate-500">{c.phone ?? '—'}</td>
+                    <td className="py-3">
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${RISK_COLORS[c.riskProfile as keyof typeof RISK_COLORS ?? 'moderate'] ?? RISK_COLORS.moderate}`}>
+                        {c.riskProfile ? c.riskProfile.charAt(0).toUpperCase() + c.riskProfile.slice(1) : 'Moderate'}
+                      </span>
+                    </td>
                     <td className="py-3 text-sm text-slate-400">{new Date(c.createdAt).toLocaleDateString()}</td>
                     <td className="py-3">
                       <div className="flex gap-2 justify-end">
@@ -102,6 +125,27 @@ export default function Clients() {
                     className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500 transition-colors" />
                 </div>
               ))}
+
+              <div>
+                <label className="block text-sm text-slate-600 mb-2">Risk Profile</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {(['conservative', 'moderate', 'aggressive'] as const).map(r => (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => setForm({ ...form, riskProfile: r })}
+                      className={`py-2 rounded-lg text-xs font-medium border transition-colors ${
+                        form.riskProfile === r
+                          ? RISK_COLORS[r] + ' border-transparent'
+                          : 'border-slate-200 text-slate-500 hover:border-slate-300'
+                      }`}
+                    >
+                      {r.charAt(0).toUpperCase() + r.slice(1)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setShowModal(false)}
                   className="flex-1 border border-slate-200 text-slate-600 py-2 rounded-lg text-sm font-medium hover:bg-slate-50">Cancel</button>
