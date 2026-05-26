@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { useSettings } from '../../contexts/SettingsContext'
 import { useDashboardSummary, useExchangeRate, useTopNews } from '../../hooks'
 import Card from '../../components/ui/Card'
 import { TrendingUp, TrendingDown, Users, DollarSign, ShieldCheck, Newspaper } from 'lucide-react'
@@ -10,22 +11,16 @@ const RISK_COLORS = {
   aggressive:   'bg-red-100 text-red-600',
 }
 
-const RISK_LABELS = {
-  conservative: 'Conservative',
-  moderate:     'Moderate',
-  aggressive:   'Aggressive',
-}
-
 function StatCard({ title, value, sub, positive, icon }: {
   title: string; value: string; sub: string; positive?: boolean; icon: React.ReactNode
 }) {
   return (
     <Card>
       <div className="flex items-start justify-between mb-3">
-        <p className="text-slate-500 text-sm font-medium">{title}</p>
+        <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">{title}</p>
         <div className="text-slate-400">{icon}</div>
       </div>
-      <p className="text-2xl font-bold text-slate-800">{value}</p>
+      <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{value}</p>
       <p className={`text-sm mt-1 flex items-center gap-1 ${
         positive === undefined ? 'text-slate-400' : positive ? 'text-emerald-500' : 'text-red-500'
       }`}>
@@ -39,6 +34,7 @@ function StatCard({ title, value, sub, positive, icon }: {
 export default function Dashboard() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const { t } = useSettings()
   const { data: summary, isLoading } = useDashboardSummary()
   const { data: usdBrl } = useExchangeRate('USD', 'BRL')
   const { data: news } = useTopNews()
@@ -49,48 +45,48 @@ export default function Dashboard() {
   return (
     <div className="p-8">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800">Welcome back, {user?.name?.split(' ')[0]} 👋</h1>
-        <p className="text-slate-500 mt-1">Here's what's happening with your clients today.</p>
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
+          {t('dashboard.welcome')}, {user?.name?.split(' ')[0]} 👋
+        </h1>
+        <p className="text-slate-500 dark:text-slate-400 mt-1">{t('dashboard.subtitle')}</p>
       </div>
 
-      {/* Stat cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatCard
-          title="Total AUM"
+          title={t('dashboard.totalAUM')}
           value={`$${totalAUM >= 1_000_000 ? (totalAUM / 1_000_000).toFixed(2) + 'M' : totalAUM.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-          sub={isLoading ? 'Loading...' : `Across ${clients.length} clients`}
+          sub={isLoading ? t('stocks.loading') : `${t('dashboard.acrossClients')} ${clients.length} ${t('dashboard.clients')}`}
           icon={<DollarSign size={18} />}
         />
         <StatCard
-          title="Clients Up Today"
+          title={t('dashboard.clientsUp')}
           value={String(summary?.clientsUp ?? 0)}
-          sub={`${summary?.clientsDown ?? 0} down · ${clients.length - (summary?.clientsUp ?? 0) - (summary?.clientsDown ?? 0)} flat`}
+          sub={`${summary?.clientsDown ?? 0} ${t('dashboard.down')} · ${clients.length - (summary?.clientsUp ?? 0) - (summary?.clientsDown ?? 0)} ${t('dashboard.flat')}`}
           positive={summary ? summary.clientsUp > summary.clientsDown : undefined}
           icon={<TrendingUp size={18} />}
         />
         <StatCard
-          title="Total Clients"
+          title={t('dashboard.totalClients')}
           value={String(clients.length)}
-          sub={`${summary?.riskBreakdown.aggressive ?? 0} aggressive · ${summary?.riskBreakdown.conservative ?? 0} conservative`}
+          sub={`${summary?.riskBreakdown.aggressive ?? 0} ${t('dashboard.aggressive')} · ${summary?.riskBreakdown.conservative ?? 0} ${t('dashboard.conservative')}`}
           icon={<Users size={18} />}
         />
         <StatCard
           title="USD / BRL"
           value={usdBrl ? `R$ ${usdBrl.rate.toFixed(4)}` : '—'}
-          sub="Live exchange rate"
+          sub={t('dashboard.liveRate')}
           icon={<Newspaper size={18} />}
         />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        {/* Client leaderboard */}
         <div className="lg:col-span-2">
           <Card>
-            <h2 className="font-semibold text-slate-700 mb-4">Client Portfolio Performance</h2>
+            <h2 className="font-semibold text-slate-700 dark:text-slate-200 mb-4">{t('dashboard.performance')}</h2>
             {isLoading ? (
-              <p className="text-slate-400 text-sm">Loading...</p>
+              <p className="text-slate-400 text-sm">{t('stocks.loading')}</p>
             ) : clients.length === 0 ? (
-              <p className="text-slate-400 text-sm">No clients with positions yet.</p>
+              <p className="text-slate-400 text-sm">{t('dashboard.noClients')}</p>
             ) : (
               <div className="space-y-1">
                 {[...clients]
@@ -99,24 +95,24 @@ export default function Dashboard() {
                     <div
                       key={c.id}
                       onClick={() => navigate(`/clients/${c.id}`)}
-                      className="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"
+                      className="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors"
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs font-bold">
                           {c.name.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-slate-700">{c.name}</p>
-                          <p className="text-xs text-slate-400">{c.positionCount} position{c.positionCount !== 1 ? 's' : ''}</p>
+                          <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{c.name}</p>
+                          <p className="text-xs text-slate-400">{c.positionCount} {t('dashboard.positions')}{c.positionCount !== 1 ? 's' : ''}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-4">
                         <div className="text-right">
-                          <p className="text-sm font-semibold text-slate-700">
+                          <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
                             ${c.totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </p>
                           <p className="text-xs text-slate-400">
-                            {c.gainPct >= 0 ? '+' : ''}{c.gainPct.toFixed(2)}% all time
+                            {c.gainPct >= 0 ? '+' : ''}{c.gainPct.toFixed(2)}% {t('dashboard.allTime')}
                           </p>
                         </div>
                         <div className={`flex items-center gap-1 text-sm font-semibold w-20 justify-end ${
@@ -133,11 +129,10 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Risk profile breakdown */}
         <Card>
           <div className="flex items-center gap-2 mb-4">
             <ShieldCheck size={16} className="text-slate-400" />
-            <h2 className="font-semibold text-slate-700">Risk Profiles</h2>
+            <h2 className="font-semibold text-slate-700 dark:text-slate-200">{t('dashboard.riskProfiles')}</h2>
           </div>
           {(['conservative', 'moderate', 'aggressive'] as const).map(r => {
             const count = summary?.riskBreakdown[r] ?? 0
@@ -147,11 +142,11 @@ export default function Dashboard() {
               <div key={r} className="mb-4">
                 <div className="flex items-center justify-between mb-1">
                   <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${RISK_COLORS[r]}`}>
-                    {RISK_LABELS[r]}
+                    {t(`clients.${r}`)}
                   </span>
-                  <span className="text-xs text-slate-500">{count} client{count !== 1 ? 's' : ''}</span>
+                  <span className="text-xs text-slate-500">{count} {t('dashboard.clients').slice(0, -1)}{count !== 1 ? 's' : ''}</span>
                 </div>
-                <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                <div className="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all ${
                       r === 'conservative' ? 'bg-blue-400' : r === 'moderate' ? 'bg-amber-400' : 'bg-red-400'
@@ -163,13 +158,13 @@ export default function Dashboard() {
             )
           })}
 
-          <div className="mt-6 pt-4 border-t border-slate-100">
-            <h3 className="font-semibold text-slate-700 mb-3 text-sm">Latest News</h3>
+          <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-700">
+            <h3 className="font-semibold text-slate-700 dark:text-slate-200 mb-3 text-sm">{t('dashboard.latestNews')}</h3>
             <div className="space-y-3">
               {news?.slice(0, 3).map((a, i) => (
                 <a key={i} href={a.url} target="_blank" rel="noopener noreferrer"
                   className="block hover:opacity-70 transition-opacity">
-                  <p className="text-xs font-medium text-slate-700 line-clamp-2">{a.title}</p>
+                  <p className="text-xs font-medium text-slate-700 dark:text-slate-300 line-clamp-2">{a.title}</p>
                   <p className="text-xs text-slate-400 mt-0.5">{a.source}</p>
                 </a>
               ))}
