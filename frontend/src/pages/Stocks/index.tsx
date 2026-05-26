@@ -2,13 +2,12 @@ import { useState, useEffect, useRef } from 'react'
 import api from '../../api/axios'
 import { useStockQuote, useStockHistory } from '../../hooks'
 import Card from '../../components/ui/Card'
-import { Search, TrendingUp, TrendingDown, AlertCircle } from 'lucide-react'
+import { Search, TrendingUp, TrendingDown } from 'lucide-react'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 
 const POPULAR = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'PETR4.SA', 'VALE3.SA']
 const RANGES = ['1d', '1mo', '3mo', '6mo', '1y']
 
-const isBrazilian = (s: string) => s.endsWith('.SA') || s.endsWith('.sa')
 
 export default function Stocks() {
   const [search, setSearch] = useState('')
@@ -58,7 +57,6 @@ export default function Stocks() {
     }
   }
 
-  const unsupported = isBrazilian(symbol)
 
   return (
     <div className="p-8">
@@ -101,14 +99,7 @@ export default function Stocks() {
         ))}
       </div>
 
-      {unsupported ? (
-        <div className="flex items-center gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-700 text-sm">
-          <AlertCircle size={16} className="shrink-0" />
-          <span>
-            Brazilian stocks (B3) are not supported yet. Try a US-listed symbol like <strong>AAPL</strong> or <strong>MSFT</strong>.
-          </span>
-        </div>
-      ) : quoteLoading ? (
+      {quoteLoading ? (
         <p className="text-slate-400 text-sm">Loading...</p>
       ) : quote && quote.price != null ? (<>
         <Card className="mb-6">
