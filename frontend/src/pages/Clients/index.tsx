@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useSettings } from '../../contexts/SettingsContext'
 import { useClients, useCreateClient, useUpdateClient, useDeleteClient } from '../../hooks'
 import Card from '../../components/ui/Card'
 import { Plus, Pencil, Trash2, X } from 'lucide-react'
@@ -16,6 +17,7 @@ const RISK_COLORS = {
 
 export default function Clients() {
   const navigate = useNavigate()
+  const { t, formatDate } = useSettings()
   const { data: clients, isLoading } = useClients()
   const createClient = useCreateClient()
   const updateClient = useUpdateClient()
@@ -55,45 +57,45 @@ export default function Clients() {
     <div className="p-8">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Clients</h1>
-          <p className="text-slate-500 mt-1">{clients?.length ?? 0} registered clients</p>
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{t('clients.title')}</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1">{clients?.length ?? 0} {t('clients.registered')}</p>
         </div>
         <button onClick={openCreate}
           className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-          <Plus size={16} /> Add Client
+          <Plus size={16} /> {t('clients.addClient')}
         </button>
       </div>
 
       <Card>
-        {isLoading ? <p className="text-slate-400 text-sm">Loading...</p> :
-          !clients?.length ? <p className="text-slate-400 text-sm">No clients yet.</p> : (
+        {isLoading ? <p className="text-slate-400 text-sm">{t('stocks.loading')}</p> :
+          !clients?.length ? <p className="text-slate-400 text-sm">{t('clients.noClients')}</p> : (
             <table className="w-full">
               <thead>
-                <tr className="border-b border-slate-100">
-                  {['Name', 'Email', 'Phone', 'Risk Profile', 'Created', ''].map((h) => (
+                <tr className="border-b border-slate-100 dark:border-slate-700">
+                  {[t('clients.name'), t('clients.email'), t('clients.phone'), t('clients.riskProfile'), t('clients.created'), ''].map((h) => (
                     <th key={h} className="text-left text-xs font-medium text-slate-400 pb-3">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {clients.map((c) => (
-                  <tr key={c.id} className="border-b border-slate-50 last:border-0">
-                    <td className="py-3 text-sm font-medium text-slate-700 cursor-pointer hover:text-emerald-500"
+                  <tr key={c.id} className="border-b border-slate-50 dark:border-slate-700/50 last:border-0">
+                    <td className="py-3 text-sm font-medium text-slate-700 dark:text-slate-200 cursor-pointer hover:text-emerald-500"
                       onClick={() => navigate(`/clients/${c.id}`)}>
                       {c.name}
                     </td>
-                    <td className="py-3 text-sm text-slate-500">{c.email}</td>
-                    <td className="py-3 text-sm text-slate-500">{c.phone ?? '—'}</td>
+                    <td className="py-3 text-sm text-slate-500 dark:text-slate-400">{c.email}</td>
+                    <td className="py-3 text-sm text-slate-500 dark:text-slate-400">{c.phone ?? '—'}</td>
                     <td className="py-3">
                       <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${RISK_COLORS[c.riskProfile as keyof typeof RISK_COLORS ?? 'moderate'] ?? RISK_COLORS.moderate}`}>
-                        {c.riskProfile ? c.riskProfile.charAt(0).toUpperCase() + c.riskProfile.slice(1) : 'Moderate'}
+                        {t(`clients.${c.riskProfile ?? 'moderate'}`)}
                       </span>
                     </td>
-                    <td className="py-3 text-sm text-slate-400">{new Date(c.createdAt).toLocaleDateString()}</td>
+                    <td className="py-3 text-sm text-slate-400">{formatDate(c.createdAt)}</td>
                     <td className="py-3">
                       <div className="flex gap-2 justify-end">
                         <button onClick={(e) => { e.stopPropagation(); openEdit(c) }} className="text-slate-400 hover:text-blue-500 transition-colors"><Pencil size={15} /></button>
-                        <button onClick={(e) => { e.stopPropagation(); if (confirm('Delete?')) deleteClient.mutate(c.id) }}
+                        <button onClick={(e) => { e.stopPropagation(); if (confirm(t('clients.delete'))) deleteClient.mutate(c.id) }}
                           className="text-slate-400 hover:text-red-500 transition-colors"><Trash2 size={15} /></button>
                       </div>
                     </td>
@@ -106,41 +108,37 @@ export default function Clients() {
 
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-md p-6">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-md p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-slate-800">{editing ? 'Edit Client' : 'New Client'}</h2>
+              <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">{t(editing ? 'clients.editClient' : 'clients.newClient')}</h2>
               <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-600"><X size={20} /></button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               {[
-                { label: 'Name', key: 'name', required: true },
-                { label: 'Email', key: 'email', required: true },
-                { label: 'Phone', key: 'phone', required: false },
-                { label: 'Document', key: 'document', required: false },
+                { label: t('clients.name'),     key: 'name',     required: true },
+                { label: t('clients.email'),    key: 'email',    required: true },
+                { label: t('clients.phone'),    key: 'phone',    required: false },
+                { label: t('clients.document'), key: 'document', required: false },
               ].map(({ label, key, required }) => (
                 <div key={key}>
-                  <label className="block text-sm text-slate-600 mb-1">{label}</label>
+                  <label className="block text-sm text-slate-600 dark:text-slate-300 mb-1">{label}</label>
                   <input value={form[key as keyof FormData]} onChange={(e) => setForm({ ...form, [key]: e.target.value })}
                     required={required}
-                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500 transition-colors" />
+                    className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500 transition-colors" />
                 </div>
               ))}
 
               <div>
-                <label className="block text-sm text-slate-600 mb-2">Risk Profile</label>
+                <label className="block text-sm text-slate-600 dark:text-slate-300 mb-2">{t('clients.riskProfile')}</label>
                 <div className="grid grid-cols-3 gap-2">
                   {(['conservative', 'moderate', 'aggressive'] as const).map(r => (
-                    <button
-                      key={r}
-                      type="button"
-                      onClick={() => setForm({ ...form, riskProfile: r })}
+                    <button key={r} type="button" onClick={() => setForm({ ...form, riskProfile: r })}
                       className={`py-2 rounded-lg text-xs font-medium border transition-colors ${
                         form.riskProfile === r
                           ? RISK_COLORS[r] + ' border-transparent'
-                          : 'border-slate-200 text-slate-500 hover:border-slate-300'
-                      }`}
-                    >
-                      {r.charAt(0).toUpperCase() + r.slice(1)}
+                          : 'border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:border-slate-300'
+                      }`}>
+                      {t(`clients.${r}`)}
                     </button>
                   ))}
                 </div>
@@ -148,10 +146,12 @@ export default function Clients() {
 
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setShowModal(false)}
-                  className="flex-1 border border-slate-200 text-slate-600 py-2 rounded-lg text-sm font-medium hover:bg-slate-50">Cancel</button>
+                  className="flex-1 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700">
+                  {t('clients.cancel')}
+                </button>
                 <button type="submit"
                   className="flex-1 bg-emerald-500 hover:bg-emerald-400 text-white py-2 rounded-lg text-sm font-medium">
-                  {editing ? 'Save Changes' : 'Create Client'}
+                  {t(editing ? 'clients.saveChanges' : 'clients.createClient')}
                 </button>
               </div>
             </form>

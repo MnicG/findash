@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { useSettings } from '../../contexts/SettingsContext'
 import { authApi } from '../../api/auth.api'
 import { TrendingUp } from 'lucide-react'
 
 export default function Login() {
   const { login } = useAuth()
+  const { t } = useSettings()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -22,7 +24,7 @@ export default function Login() {
       navigate('/dashboard')
     } catch {
       setLoading(false)
-      setError('Invalid email or password')
+      setError(t('auth.invalidCredentials'))
     }
   }
 
@@ -36,7 +38,7 @@ export default function Login() {
             </div>
             <span className="text-white text-2xl font-bold">FinDash</span>
           </div>
-          <h2 className="text-slate-400 text-sm">Sign in to your account</h2>
+          <h2 className="text-slate-400 text-sm">{t('auth.signIn')}</h2>
         </div>
 
         <div className="bg-[#131929] rounded-2xl border border-white/10 p-8">
@@ -47,7 +49,7 @@ export default function Login() {
           )}
           <form onSubmit={handleSubmit} noValidate className="space-y-5">
             <div>
-              <label className="block text-slate-400 text-sm mb-2">Email</label>
+              <label className="block text-slate-400 text-sm mb-2">{t('auth.email')}</label>
               <input
                 type="email"
                 value={email}
@@ -58,7 +60,7 @@ export default function Login() {
               />
             </div>
             <div>
-              <label className="block text-slate-400 text-sm mb-2">Password</label>
+              <label className="block text-slate-400 text-sm mb-2">{t('auth.password')}</label>
               <input
                 type="password"
                 value={password}
@@ -73,13 +75,13 @@ export default function Login() {
               disabled={loading}
               className="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-semibold py-3 rounded-lg transition-colors disabled:opacity-50"
             >
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading ? t('auth.signingIn') : t('auth.login')}
             </button>
           </form>
           <p className="text-center text-slate-500 text-sm mt-6">
-            Don't have an account?{' '}
+            {t('auth.noAccount')}{' '}
             <Link to="/register" className="text-emerald-400 hover:text-emerald-300">
-              Register
+              {t('auth.register')}
             </Link>
           </p>
         </div>

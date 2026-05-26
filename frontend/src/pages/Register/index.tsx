@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { useSettings } from '../../contexts/SettingsContext'
 import { authApi } from '../../api/auth.api'
 import { TrendingUp } from 'lucide-react'
 
 export default function Register() {
   const { login } = useAuth()
+  const { t } = useSettings()
   const navigate = useNavigate()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -22,7 +24,7 @@ export default function Register() {
       login(token, user)
       navigate('/dashboard')
     } catch {
-      setError('Email already in use or invalid data')
+      setError(t('auth.error'))
     } finally {
       setLoading(false)
     }
@@ -38,7 +40,7 @@ export default function Register() {
             </div>
             <span className="text-white text-2xl font-bold">FinDash</span>
           </div>
-          <h2 className="text-slate-400 text-sm">Create your account</h2>
+          <h2 className="text-slate-400 text-sm">{t('auth.createAccount')}</h2>
         </div>
 
         <div className="bg-[#131929] rounded-2xl border border-white/10 p-8">
@@ -49,9 +51,9 @@ export default function Register() {
           )}
           <form onSubmit={handleSubmit} className="space-y-5">
             {[
-              { label: 'Name', value: name, set: setName, type: 'text', placeholder: 'Your name' },
-              { label: 'Email', value: email, set: setEmail, type: 'email', placeholder: 'you@example.com' },
-              { label: 'Password', value: password, set: setPassword, type: 'password', placeholder: 'Min. 6 characters' },
+              { label: t('auth.name'),     value: name,     set: setName,     type: 'text',     placeholder: 'Your name' },
+              { label: t('auth.email'),    value: email,    set: setEmail,    type: 'email',    placeholder: 'you@example.com' },
+              { label: t('auth.password'), value: password, set: setPassword, type: 'password', placeholder: 'Min. 6 characters' },
             ].map(({ label, value, set, type, placeholder }) => (
               <div key={label}>
                 <label className="block text-slate-400 text-sm mb-2">{label}</label>
@@ -62,12 +64,12 @@ export default function Register() {
             ))}
             <button type="submit" disabled={loading}
               className="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-semibold py-3 rounded-lg transition-colors disabled:opacity-50">
-              {loading ? 'Creating account...' : 'Create account'}
+              {loading ? t('auth.creating') : t('auth.create')}
             </button>
           </form>
           <p className="text-center text-slate-500 text-sm mt-6">
-            Already have an account?{' '}
-            <Link to="/login" className="text-emerald-400 hover:text-emerald-300">Sign in</Link>
+            {t('auth.hasAccount')}{' '}
+            <Link to="/login" className="text-emerald-400 hover:text-emerald-300">{t('auth.signInLink')}</Link>
           </p>
         </div>
       </div>
