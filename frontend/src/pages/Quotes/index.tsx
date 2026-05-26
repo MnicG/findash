@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useExchangeRate } from '../../hooks'
 import Card from '../../components/ui/Card'
-import { TrendingUp, TrendingDown, ArrowRightLeft } from 'lucide-react'
+import { ArrowRightLeft } from 'lucide-react'
 
 const PAIRS = [
   { from: 'USD', to: 'BRL' }, { from: 'EUR', to: 'BRL' },
@@ -147,12 +147,7 @@ function RateCard({ from, to }: { from: string; to: string }) {
           <ArrowRightLeft size={14} className="text-slate-400" />
           <span className="text-sm font-bold text-slate-800">{to}</span>
         </div>
-        {data && (
-          <span className={`flex items-center gap-1 text-xs font-medium ${data.changePercent >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-            {data.changePercent >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-            {data.changePercent >= 0 ? '+' : ''}{data.changePercent.toFixed(4)}%
-          </span>
-        )}
+
       </div>
       {isLoading ? <div className="h-8 bg-slate-100 rounded animate-pulse" /> :
         data ? (
@@ -185,12 +180,7 @@ export default function Quotes() {
           <CurrencyInput value={to} onChange={setTo} placeholder="BRL" />
           {isLoading ? <span className="text-slate-400 text-sm ml-4">Loading...</span> :
             custom ? (
-              <div className="flex items-center gap-3 ml-4">
-                <span className="text-2xl font-bold text-slate-800">{custom.rate.toFixed(4)}</span>
-                <span className={`text-sm font-medium ${custom.changePercent >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-                  {custom.changePercent >= 0 ? '+' : ''}{custom.changePercent.toFixed(4)}%
-                </span>
-              </div>
+              <span className="text-2xl font-bold text-slate-800 ml-4">{custom.rate.toFixed(4)}</span>
             ) : null}
         </div>
       </Card>
