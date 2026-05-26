@@ -5,7 +5,7 @@ import Card from '../../components/ui/Card'
 import { Search, TrendingUp, TrendingDown, AlertCircle } from 'lucide-react'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 
-const POPULAR = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA']
+const POPULAR = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'PETR4.SA', 'VALE3.SA']
 const RANGES = ['1d', '1mo', '3mo', '6mo', '1y']
 
 const isBrazilian = (s: string) => s.endsWith('.SA') || s.endsWith('.sa')
@@ -26,10 +26,7 @@ export default function Stocks() {
     const t = setTimeout(async () => {
       try {
         const res = await api.get(`/stocks/search?q=${search}`)
-        const filtered = search.includes('.')
-          ? res.data
-          : res.data.filter((s: { symbol: string; name: string }) => !s.symbol.includes('.'))
-        setSuggestions(filtered)
+        setSuggestions(res.data)
         setShowSuggestions(true)
       } catch { setSuggestions([]) }
     }, 300)
