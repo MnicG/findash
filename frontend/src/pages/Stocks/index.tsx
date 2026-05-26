@@ -26,7 +26,10 @@ export default function Stocks() {
     const t = setTimeout(async () => {
       try {
         const res = await api.get(`/stocks/search?q=${search}`)
-        setSuggestions(res.data)
+        const filtered = search.includes('.')
+          ? res.data
+          : res.data.filter((s: { symbol: string; name: string }) => !s.symbol.includes('.'))
+        setSuggestions(filtered)
         setShowSuggestions(true)
       } catch { setSuggestions([]) }
     }, 300)
@@ -51,7 +54,11 @@ export default function Stocks() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
-    if (search.trim()) selectSymbol(search.trim().toUpperCase())
+    if (suggestions.length > 0) {
+      selectSymbol(suggestions[0].symbol)  // prefer first suggestion over raw typed text
+    } else if (search.trim()) {
+      selectSymbol(search.trim().toUpperCase())
+    }
   }
 
   const unsupported = isBrazilian(symbol)
