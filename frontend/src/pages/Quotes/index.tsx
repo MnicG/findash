@@ -61,7 +61,7 @@ function CurrencyInput({ value, onChange, placeholder }: { value: string; onChan
     <div className="relative" ref={wrapperRef}>
       <input value={input} onChange={(e) => handleChange(e.target.value.toUpperCase())}
         onBlur={handleBlurCommit} maxLength={5} placeholder={placeholder}
-        className="w-28 border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-lg px-3 py-2 text-sm font-mono uppercase focus:outline-none focus:border-emerald-500 transition-colors" />
+        className="w-20 md:w-28 border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-lg px-3 py-2 text-sm font-mono uppercase focus:outline-none focus:border-emerald-500 transition-colors" />
       {open && suggestions.length > 0 && (
         <div className="absolute z-10 top-full mt-1 w-52 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg shadow-lg overflow-hidden">
           {suggestions.map((c) => (
@@ -90,7 +90,7 @@ function RateCard({ from, to }: { from: string; to: string }) {
       {isLoading ? <div className="h-8 bg-slate-100 dark:bg-slate-700 rounded animate-pulse" /> :
         data ? (
           <>
-            <p className="text-3xl font-bold text-slate-800 dark:text-slate-100">{data.rate.toFixed(4)}</p>
+            <p className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-100">{data.rate.toFixed(4)}</p>
             <p className="text-xs text-slate-400 mt-1">{t('quotes.prevClose')} {data.previousClose.toFixed(4)}</p>
           </>
         ) : <p className="text-slate-400 text-sm">{t('quotes.unavailable')}</p>}
@@ -105,28 +105,28 @@ export default function Quotes() {
   const { data: custom, isLoading } = useExchangeRate(from, to)
 
   return (
-    <div className="p-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{t('quotes.title')}</h1>
-        <p className="text-slate-500 dark:text-slate-400 mt-1">{t('quotes.subtitle')}</p>
+    <div className="p-4 md:p-8">
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-xl md:text-2xl font-bold text-slate-800 dark:text-slate-100">{t('quotes.title')}</h1>
+        <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">{t('quotes.subtitle')}</p>
       </div>
 
-      <Card className="mb-8">
+      <Card className="mb-6 md:mb-8">
         <h2 className="font-semibold text-slate-700 dark:text-slate-200 mb-4">{t('quotes.customRate')}</h2>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3 flex-wrap">
           <CurrencyInput value={from} onChange={setFrom} placeholder="USD" />
           <ArrowRightLeft size={16} className="text-slate-400" />
           <CurrencyInput value={to} onChange={setTo} placeholder="BRL" />
           {isLoading
-            ? <span className="text-slate-400 text-sm ml-4">{t('stocks.loading')}</span>
+            ? <span className="text-slate-400 text-sm ml-2">{t('stocks.loading')}</span>
             : custom
-              ? <span className="text-2xl font-bold text-slate-800 dark:text-slate-100 ml-4">{custom.rate.toFixed(4)}</span>
+              ? <span className="text-xl md:text-2xl font-bold text-slate-800 dark:text-slate-100 ml-2">{custom.rate.toFixed(4)}</span>
               : null}
         </div>
       </Card>
 
       <h2 className="font-semibold text-slate-700 dark:text-slate-200 mb-4">{t('quotes.popularPairs')}</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
         {PAIRS.map(({ from, to }) => <RateCard key={`${from}-${to}`} from={from} to={to} />)}
       </div>
     </div>

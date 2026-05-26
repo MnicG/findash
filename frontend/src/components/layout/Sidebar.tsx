@@ -1,9 +1,9 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { useSettings } from '../../contexts/SettingsContext'
-import { LayoutDashboard, Users, TrendingUp, DollarSign, Newspaper, LogOut, Settings } from 'lucide-react'
+import { LayoutDashboard, Users, TrendingUp, DollarSign, Newspaper, LogOut, Settings, X } from 'lucide-react'
 
-export default function Sidebar() {
+export default function Sidebar({ onClose }: { onClose?: () => void }) {
   const { logout, user } = useAuth()
   const { t } = useSettings()
   const navigate = useNavigate()
@@ -18,17 +18,25 @@ export default function Sidebar() {
   ]
 
   return (
-    <aside className="w-60 min-h-screen bg-[#0a0f1e] flex flex-col">
-      <div className="px-6 py-8">
-        <h1 className="text-white text-2xl font-bold tracking-tight">
-          Fin<span className="text-emerald-400">Dash</span>
-        </h1>
-        <p className="text-slate-500 text-xs mt-1">Financial Dashboard</p>
+    <aside className="w-60 min-h-screen h-full bg-[#0a0f1e] flex flex-col">
+      <div className="px-6 py-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-white text-2xl font-bold tracking-tight">
+            Fin<span className="text-emerald-400">Dash</span>
+          </h1>
+          <p className="text-slate-500 text-xs mt-1">Financial Dashboard</p>
+        </div>
+        {onClose && (
+          <button onClick={onClose} className="text-slate-400 hover:text-white lg:hidden">
+            <X size={20} />
+          </button>
+        )}
       </div>
 
       <nav className="flex-1 px-3">
         {links.map(({ to, icon: Icon, label }) => (
           <NavLink key={to} to={to}
+            onClick={onClose}
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-3 rounded-lg mb-1 text-sm font-medium transition-all ${
                 isActive
