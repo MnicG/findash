@@ -30,10 +30,8 @@ export default function Clients() {
   const openEdit = (c: Client) => {
     setEditing(c)
     setForm({
-      name: c.name,
-      email: c.email,
-      phone: c.phone ?? '',
-      document: c.document ?? '',
+      name: c.name, email: c.email,
+      phone: c.phone ?? '', document: c.document ?? '',
       riskProfile: (c.riskProfile as FormData['riskProfile']) ?? 'moderate',
     })
     setShowModal(true)
@@ -42,10 +40,8 @@ export default function Clients() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const payload = {
-      name: form.name,
-      email: form.email,
-      phone: form.phone || undefined,
-      document: form.document || undefined,
+      name: form.name, email: form.email,
+      phone: form.phone || undefined, document: form.document || undefined,
       riskProfile: form.riskProfile,
     }
     if (editing) await updateClient.mutateAsync({ id: editing.id, data: payload })
@@ -54,61 +50,92 @@ export default function Clients() {
   }
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-8">
+    <div className="p-4 md:p-8">
+      <div className="flex items-center justify-between mb-6 md:mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{t('clients.title')}</h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">{clients?.length ?? 0} {t('clients.registered')}</p>
+          <h1 className="text-xl md:text-2xl font-bold text-slate-800 dark:text-slate-100">{t('clients.title')}</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">{clients?.length ?? 0} {t('clients.registered')}</p>
         </div>
         <button onClick={openCreate}
-          className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-          <Plus size={16} /> {t('clients.addClient')}
+          className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white px-3 md:px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+          <Plus size={16} /> <span className="hidden sm:inline">{t('clients.addClient')}</span>
         </button>
       </div>
 
-      <Card>
-        {isLoading ? <p className="text-slate-400 text-sm">{t('stocks.loading')}</p> :
-          !clients?.length ? <p className="text-slate-400 text-sm">{t('clients.noClients')}</p> : (
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-slate-100 dark:border-slate-700">
-                  {[t('clients.name'), t('clients.email'), t('clients.phone'), t('clients.riskProfile'), t('clients.created'), ''].map((h) => (
-                    <th key={h} className="text-left text-xs font-medium text-slate-400 pb-3">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {clients.map((c) => (
-                  <tr key={c.id} className="border-b border-slate-50 dark:border-slate-700/50 last:border-0">
-                    <td className="py-3 text-sm font-medium text-slate-700 dark:text-slate-200 cursor-pointer hover:text-emerald-500"
-                      onClick={() => navigate(`/clients/${c.id}`)}>
-                      {c.name}
-                    </td>
-                    <td className="py-3 text-sm text-slate-500 dark:text-slate-400">{c.email}</td>
-                    <td className="py-3 text-sm text-slate-500 dark:text-slate-400">{c.phone ?? '—'}</td>
-                    <td className="py-3">
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${RISK_COLORS[c.riskProfile as keyof typeof RISK_COLORS ?? 'moderate'] ?? RISK_COLORS.moderate}`}>
-                        {t(`clients.${c.riskProfile ?? 'moderate'}`)}
-                      </span>
-                    </td>
-                    <td className="py-3 text-sm text-slate-400">{formatDate(c.createdAt)}</td>
-                    <td className="py-3">
-                      <div className="flex gap-2 justify-end">
-                        <button onClick={(e) => { e.stopPropagation(); openEdit(c) }} className="text-slate-400 hover:text-blue-500 transition-colors"><Pencil size={15} /></button>
-                        <button onClick={(e) => { e.stopPropagation(); if (confirm(t('clients.delete'))) deleteClient.mutate(c.id) }}
-                          className="text-slate-400 hover:text-red-500 transition-colors"><Trash2 size={15} /></button>
-                      </div>
-                    </td>
+      {/* Desktop table */}
+      <div className="hidden md:block">
+        <Card>
+          {isLoading ? <p className="text-slate-400 text-sm">{t('stocks.loading')}</p> :
+            !clients?.length ? <p className="text-slate-400 text-sm">{t('clients.noClients')}</p> : (
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-slate-100 dark:border-slate-700">
+                    {[t('clients.name'), t('clients.email'), t('clients.phone'), t('clients.riskProfile'), t('clients.created'), ''].map((h) => (
+                      <th key={h} className="text-left text-xs font-medium text-slate-400 pb-3">{h}</th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-      </Card>
+                </thead>
+                <tbody>
+                  {clients.map((c) => (
+                    <tr key={c.id} className="border-b border-slate-50 dark:border-slate-700/50 last:border-0">
+                      <td className="py-3 text-sm font-medium text-slate-700 dark:text-slate-200 cursor-pointer hover:text-emerald-500"
+                        onClick={() => navigate(`/clients/${c.id}`)}>
+                        {c.name}
+                      </td>
+                      <td className="py-3 text-sm text-slate-500 dark:text-slate-400">{c.email}</td>
+                      <td className="py-3 text-sm text-slate-500 dark:text-slate-400">{c.phone ?? '—'}</td>
+                      <td className="py-3">
+                        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${RISK_COLORS[c.riskProfile as keyof typeof RISK_COLORS ?? 'moderate'] ?? RISK_COLORS.moderate}`}>
+                          {t(`clients.${c.riskProfile ?? 'moderate'}`)}
+                        </span>
+                      </td>
+                      <td className="py-3 text-sm text-slate-400">{formatDate(c.createdAt)}</td>
+                      <td className="py-3">
+                        <div className="flex gap-2 justify-end">
+                          <button onClick={(e) => { e.stopPropagation(); openEdit(c) }} className="text-slate-400 hover:text-blue-500 transition-colors"><Pencil size={15} /></button>
+                          <button onClick={(e) => { e.stopPropagation(); if (confirm(t('clients.delete'))) deleteClient.mutate(c.id) }}
+                            className="text-slate-400 hover:text-red-500 transition-colors"><Trash2 size={15} /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+        </Card>
+      </div>
+
+      {/* Mobile cards */}
+      <div className="md:hidden space-y-3">
+        {isLoading ? <p className="text-slate-400 text-sm">{t('stocks.loading')}</p> :
+          !clients?.length ? <p className="text-slate-400 text-sm">{t('clients.noClients')}</p> :
+          clients.map((c) => (
+            <Card key={c.id} className="cursor-pointer" >
+              <div className="flex items-start justify-between">
+                <div className="flex-1 min-w-0" onClick={() => navigate(`/clients/${c.id}`)}>
+                  <p className="font-medium text-slate-800 dark:text-slate-100">{c.name}</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 truncate">{c.email}</p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${RISK_COLORS[c.riskProfile as keyof typeof RISK_COLORS ?? 'moderate'] ?? RISK_COLORS.moderate}`}>
+                      {t(`clients.${c.riskProfile ?? 'moderate'}`)}
+                    </span>
+                    <span className="text-xs text-slate-400">{formatDate(c.createdAt)}</span>
+                  </div>
+                </div>
+                <div className="flex gap-2 ml-3 shrink-0">
+                  <button onClick={() => openEdit(c)} className="text-slate-400 hover:text-blue-500 transition-colors p-1"><Pencil size={15} /></button>
+                  <button onClick={() => { if (confirm(t('clients.delete'))) deleteClient.mutate(c.id) }}
+                    className="text-slate-400 hover:text-red-500 transition-colors p-1"><Trash2 size={15} /></button>
+                </div>
+              </div>
+            </Card>
+          ))
+        }
+      </div>
 
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-md p-6">
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">{t(editing ? 'clients.editClient' : 'clients.newClient')}</h2>
               <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-600"><X size={20} /></button>
@@ -127,7 +154,6 @@ export default function Clients() {
                     className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500 transition-colors" />
                 </div>
               ))}
-
               <div>
                 <label className="block text-sm text-slate-600 dark:text-slate-300 mb-2">{t('clients.riskProfile')}</label>
                 <div className="grid grid-cols-3 gap-2">
@@ -143,7 +169,6 @@ export default function Clients() {
                   ))}
                 </div>
               </div>
-
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setShowModal(false)}
                   className="flex-1 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700">

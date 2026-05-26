@@ -43,15 +43,15 @@ export default function Dashboard() {
   const clients = summary?.clients ?? []
 
   return (
-    <div className="p-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
+    <div className="p-4 md:p-8">
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-xl md:text-2xl font-bold text-slate-800 dark:text-slate-100">
           {t('dashboard.welcome')}, {user?.name?.split(' ')[0]} 👋
         </h1>
-        <p className="text-slate-500 dark:text-slate-400 mt-1">{t('dashboard.subtitle')}</p>
+        <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm md:text-base">{t('dashboard.subtitle')}</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
         <StatCard
           title={t('dashboard.totalAUM')}
           value={`$${totalAUM >= 1_000_000 ? (totalAUM / 1_000_000).toFixed(2) + 'M' : totalAUM.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
@@ -79,7 +79,7 @@ export default function Dashboard() {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 mb-6">
         <div className="lg:col-span-2">
           <Card>
             <h2 className="font-semibold text-slate-700 dark:text-slate-200 mb-4">{t('dashboard.performance')}</h2>
@@ -98,16 +98,16 @@ export default function Dashboard() {
                       className="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs font-bold">
+                        <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs font-bold shrink-0">
                           {c.name.charAt(0).toUpperCase()}
                         </div>
-                        <div>
-                          <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{c.name}</p>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">{c.name}</p>
                           <p className="text-xs text-slate-400">{c.positionCount} {t('dashboard.positions')}{c.positionCount !== 1 ? 's' : ''}</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-4">
-                        <div className="text-right">
+                      <div className="flex items-center gap-2 md:gap-4 shrink-0 ml-2">
+                        <div className="text-right hidden sm:block">
                           <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
                             ${c.totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </p>
@@ -115,7 +115,7 @@ export default function Dashboard() {
                             {c.gainPct >= 0 ? '+' : ''}{c.gainPct.toFixed(2)}% {t('dashboard.allTime')}
                           </p>
                         </div>
-                        <div className={`flex items-center gap-1 text-sm font-semibold w-20 justify-end ${
+                        <div className={`flex items-center gap-1 text-sm font-semibold ${
                           c.dailyChangePct > 0 ? 'text-emerald-500' : c.dailyChangePct < 0 ? 'text-red-500' : 'text-slate-400'
                         }`}>
                           {c.dailyChangePct > 0 ? <TrendingUp size={14} /> : c.dailyChangePct < 0 ? <TrendingDown size={14} /> : null}

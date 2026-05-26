@@ -26,8 +26,7 @@ export default function Stocks() {
     const timer = setTimeout(async () => {
       try {
         const res = await api.get(`/stocks/search?q=${search}`)
-        setSuggestions(res.data)
-        setShowSuggestions(true)
+        setSuggestions(res.data); setShowSuggestions(true)
       } catch { setSuggestions([]) }
     }, 300)
     return () => clearTimeout(timer)
@@ -53,14 +52,14 @@ export default function Stocks() {
   }
 
   return (
-    <div className="p-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{t('stocks.title')}</h1>
-        <p className="text-slate-500 dark:text-slate-400 mt-1">{t('stocks.subtitle')}</p>
+    <div className="p-4 md:p-8">
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-xl md:text-2xl font-bold text-slate-800 dark:text-slate-100">{t('stocks.title')}</h1>
+        <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">{t('stocks.subtitle')}</p>
       </div>
 
-      <form onSubmit={handleSearch} className="flex gap-3 mb-6">
-        <div className="relative flex-1 max-w-sm" ref={wrapperRef}>
+      <form onSubmit={handleSearch} className="flex gap-2 md:gap-3 mb-6">
+        <div className="relative flex-1" ref={wrapperRef}>
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             value={search}
@@ -81,7 +80,7 @@ export default function Stocks() {
             </div>
           )}
         </div>
-        <button type="submit" className="bg-emerald-500 hover:bg-emerald-400 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+        <button type="submit" className="bg-emerald-500 hover:bg-emerald-400 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shrink-0">
           {t('stocks.search')}
         </button>
       </form>
@@ -101,24 +100,24 @@ export default function Stocks() {
         <p className="text-slate-400 text-sm">{t('stocks.loading')}</p>
       ) : quote && quote.price != null ? (
         <>
-          <Card className="mb-6">
+          <Card className="mb-4 md:mb-6">
             <div className="flex items-start justify-between">
               <div>
                 <div className="flex items-center gap-3 mb-1">
-                  <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{quote.symbol}</h2>
+                  <h2 className="text-xl md:text-2xl font-bold text-slate-800 dark:text-slate-100">{quote.symbol}</h2>
                   <span className="text-sm text-slate-400">{quote.exchange}</span>
                 </div>
-                <p className="text-slate-500 text-sm mb-4">{quote.name}</p>
-                <p className="text-4xl font-bold text-slate-800 dark:text-slate-100">
+                <p className="text-slate-500 text-sm mb-3 md:mb-4">{quote.name}</p>
+                <p className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-100">
                   {quote.currency === 'BRL' ? 'R$' : '$'} {quote.price.toFixed(2)}
                 </p>
               </div>
-              <div className={`flex items-center gap-2 text-lg font-semibold ${quote.changePercent >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-                {quote.changePercent >= 0 ? <TrendingUp size={20} /> : <TrendingDown size={20} />}
+              <div className={`flex items-center gap-1 md:gap-2 text-base md:text-lg font-semibold ${quote.changePercent >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+                {quote.changePercent >= 0 ? <TrendingUp size={18} /> : <TrendingDown size={18} />}
                 {quote.changePercent >= 0 ? '+' : ''}{quote.changePercent.toFixed(2)}%
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4 mt-6 pt-6 border-t border-slate-100 dark:border-slate-700">
+            <div className="grid grid-cols-2 gap-4 mt-4 md:mt-6 pt-4 md:pt-6 border-t border-slate-100 dark:border-slate-700">
               <div>
                 <p className="text-xs text-slate-400">{t('stocks.prevClose')}</p>
                 <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">{quote.previousClose.toFixed(2)}</p>
@@ -133,12 +132,12 @@ export default function Stocks() {
           </Card>
 
           <Card>
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-4 md:mb-6">
               <h3 className="font-semibold text-slate-700 dark:text-slate-200">{t('stocks.priceHistory')}</h3>
               <div className="flex gap-1">
                 {RANGES.map((r) => (
                   <button key={r} onClick={() => setRange(r)}
-                    className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                    className={`px-2 md:px-3 py-1 rounded-md text-xs font-medium transition-colors ${
                       range === r ? 'bg-emerald-500 text-white' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
                     }`}>{r}</button>
                 ))}
@@ -147,11 +146,11 @@ export default function Stocks() {
             {histLoading ? (
               <p className="text-slate-400 text-sm">{t('stocks.loadingChart')}</p>
             ) : (
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={250}>
                 <LineChart data={history}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                  <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} domain={['auto', 'auto']} />
+                  <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#94a3b8' }} tickLine={false} axisLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} tickLine={false} axisLine={false} domain={['auto', 'auto']} />
                   <Tooltip contentStyle={{ border: '1px solid #e2e8f0', borderRadius: 8, fontSize: 12 }} />
                   <Line type="monotone" dataKey="close" stroke="#10b981" strokeWidth={2} dot={false} />
                 </LineChart>
