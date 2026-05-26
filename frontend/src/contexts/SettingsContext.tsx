@@ -146,13 +146,18 @@ const translations: Record<string, Record<Language, string>> = {
 const SettingsContext = createContext<Settings>({} as Settings)
 
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {
-  const [language, setLanguageState] = useState<Language>(() =>
-    (localStorage.getItem('language') as Language) || 'en')
-  const [dateFormat, setDateFormatState] = useState<DateFormat>(() =>
-    (localStorage.getItem('dateFormat') as DateFormat) || 'DD/MM/YYYY')
-  const [theme, setThemeState] = useState<Theme>(() =>
-    (localStorage.getItem('theme') as Theme) || 'light')
-
+  const [language, setLanguageState] = useState<Language>(() => {
+    try { return (localStorage.getItem('language') as Language) || 'en' }
+    catch { return 'en' }
+  })
+  const [dateFormat, setDateFormatState] = useState<DateFormat>(() => {
+    try { return (localStorage.getItem('dateFormat') as DateFormat) || 'DD/MM/YYYY' }
+    catch { return 'DD/MM/YYYY' }
+  })
+  const [theme, setThemeState] = useState<Theme>(() => {
+    try { return (localStorage.getItem('theme') as Theme) || 'light' }
+    catch { return 'light' }
+  })
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')
   }, [theme])
