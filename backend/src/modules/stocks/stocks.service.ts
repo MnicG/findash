@@ -11,15 +11,14 @@ export const stocksService = {
       const q = data[0];
       if (!q || q.price == null) throw new ApiError(404, "Stock not found");
       return {
-  symbol: q.symbol,
-  name: q.name,
-  price: Number(q.price) || 0,
-  previousClose: Number(q.previousClose) || 0,
-  change: Number(q.change) || 0,
-  changePercent: Number(q.changePercentage) || 0,
-  currency: q.currency || 'USD',
-  exchange: q.exchange,
-    
+        symbol: q.symbol,
+        name: q.name,
+        price: Number(q.price) || 0,
+        previousClose: Number(q.previousClose) || 0,
+        change: Number(q.change) || 0,
+        changePercent: Number(q.changePercentage) || 0,
+        currency: q.currency || 'USD',
+        exchange: q.exchange,
       };
     } catch (error) {
       if (error instanceof ApiError) throw error;
@@ -36,7 +35,7 @@ export const stocksService = {
         );
         return (data || []).slice(0, 80).reverse().map((d: any) => ({
           date: d.date.split(' ')[1].slice(0, 5),
-          close: d.close,
+          close: Number(d.close),  // fix: was string
         }));
       }
 
@@ -49,7 +48,10 @@ export const stocksService = {
       const { data } = await httpClient.get(
         `${FMP}/historical-price-eod/light?symbol=${symbol}&from=${from}&to=${to}&apikey=${key}`
       );
-      return (data || []).reverse().map((d: any) => ({ date: d.date, close: d.close }));
+      return (data || []).reverse().map((d: any) => ({
+        date: d.date,
+        close: Number(d.close),  // fix: was string
+      }));
     } catch (error) {
       if (error instanceof ApiError) throw error;
       throw new ApiError(502, "Failed to fetch stock history");

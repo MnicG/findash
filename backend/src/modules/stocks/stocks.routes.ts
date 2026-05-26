@@ -6,6 +6,7 @@ const router = Router();
 
 router.use(authMiddleware);
 
+router.get('/search', stocksController.search); 
 router.get("/:symbol", stocksController.getQuote);
 router.get("/:symbol/history", stocksController.getHistory);
 
