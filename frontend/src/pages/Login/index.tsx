@@ -15,18 +15,22 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
-    try {
-      const { token, user } = await authApi.login(email, password)
-      login(token, user)
-      navigate('/dashboard')
-    } catch {
-      setLoading(false)
-      setError(t('auth.invalidCredentials'))
-    }
+  e.preventDefault()
+  setError('')
+  setLoading(true)
+  try {
+    const { token, user } = await authApi.login(email, password)
+    console.log('got token', token)
+    login(token, user)
+    console.log('login called')
+    navigate('/dashboard')
+    console.log('navigate called')
+  } catch (err) {
+    console.log('caught error:', err)
+    setLoading(false)
+    setError(t('auth.invalidCredentials'))
   }
+}
 
   return (
     <div className="min-h-screen bg-[#0a0f1e] flex items-center justify-center px-4">
