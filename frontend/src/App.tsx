@@ -10,6 +10,7 @@ import Quotes from './pages/Quotes'
 import News from './pages/News'
 import ClientDetail from './pages/Clients/[id]'
 import Settings from './pages/Settings'
+import AI from './pages/AI'
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth()
@@ -31,6 +32,7 @@ export default function App() {
           <Route path="quotes" element={<Quotes />} />
           <Route path="news" element={<News />} />
           <Route path="settings" element={<Settings />} />
+          <Route path="ai" element={<AI />} />
           <Route path="/clients/:id" element={<PrivateRoute><ClientDetail /></PrivateRoute>} />
         </Route>
         <Route path="*" element={<Navigate to="/dashboard" replace />} />

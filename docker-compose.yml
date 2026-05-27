@@ -9,6 +9,36 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./backend/.env
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/findash
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  ai:
+    build:
+      context: ./findash-ia
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./findash-ia/.env
+    environment:
+      - ALLOWED_ORIGINS=http://localhost:5173
+    restart: unless-stopped
 
 volumes:
   pgdata:

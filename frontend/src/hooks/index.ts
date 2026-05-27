@@ -4,6 +4,8 @@ import { quotesApi } from '../api/quotes.api'
 import { newsApi } from '../api/news.api'
 import type { Client, Position } from '../types'
 import { clientsApi } from '../api/clients.api'
+import { aiApi } from '../api/ai.api'
+import type { ChatMessage } from '../api/ai.api'
 
 export const useClientPositions = (clientId: string) =>
   useQuery({
@@ -117,6 +119,32 @@ export const useSearchNews = (q: string) =>
     queryKey: ['news-search', q],
     queryFn: () => newsApi.search(q),
     enabled: !!q,
+  })
+
+  export const useAnalyzePortfolio = (clientId: string) =>
+  useMutation({
+    mutationFn: () => aiApi.analyzePortfolio(clientId),
+  })
+
+export const useRebalancePortfolio = (clientId: string) =>
+  useMutation({
+    mutationFn: () => aiApi.rebalancePortfolio(clientId),
+  })
+
+export const useSummarizeNews = () =>
+  useMutation({
+    mutationFn: (articles: object[]) => aiApi.summarizeNews(articles),
+  })
+
+export const useNewsImpact = (clientId: string) =>
+  useMutation({
+    mutationFn: (articles: object[]) => aiApi.newsImpact(clientId, articles),
+  })
+
+export const useChat = () =>
+  useMutation({
+    mutationFn: ({ messages, clientId }: { messages: ChatMessage[]; clientId?: string }) =>
+      aiApi.chat(messages, clientId),
   })
 
 // Fetches all clients with positions, then live prices for all unique symbols

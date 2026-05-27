@@ -5,6 +5,7 @@ import clientRoutes from "./modules/clients/client.routes";
 import stocksRoutes from "./modules/stocks/stocks.routes";
 import quotesRoutes from "./modules/quotes/quotes.routes";
 import newsRoutes from "./modules/news/news.routes";
+import aiRoutes from "./modules/ai/ai.routes";
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use("/clients", clientRoutes);
 app.use("/stocks", stocksRoutes);
 app.use("/quotes", quotesRoutes);
 app.use("/news", newsRoutes);
+app.use("/ai", aiRoutes);
 
 app.use(errorMiddleware);
 

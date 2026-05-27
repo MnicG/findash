@@ -141,6 +141,26 @@ const translations: Record<string, Record<Language, string>> = {
   'auth.hasAccount':         { en: 'Already have an account?', pt: 'Já tem uma conta?' },
   'auth.signInLink':         { en: 'Sign in',              pt: 'Entrar' },
   'auth.error':              { en: 'Email already in use or invalid data', pt: 'E-mail já em uso ou dados inválidos' },
+  // AI
+  'ai.title':              { en: 'Finn AI',                        pt: 'Finn IA' },
+  'ai.subtitle':           { en: 'Financial assistant powered by AI', pt: 'Assistente financeiro com IA' },
+  'ai.clientContext':      { en: 'Client context (optional)',      pt: 'Contexto do cliente (opcional)' },
+  'ai.noClient':           { en: 'No client selected — general assistant mode', pt: 'Nenhum cliente selecionado — modo geral' },
+  'ai.chat':               { en: 'Chat with Finn',                pt: 'Conversar com Finn' },
+  'ai.chatPlaceholder':    { en: 'Ask Finn anything...',          pt: 'Pergunte qualquer coisa ao Finn...' },
+  'ai.emptyChat':          { en: "Ask me anything about markets, portfolios, or financial concepts", pt: 'Pergunte sobre mercados, portfólios ou conceitos financeiros' },
+  'ai.emptyChatClient':    { en: "Ask me anything about this client's portfolio", pt: 'Pergunte sobre o portfólio deste cliente' },
+  'ai.clearChat':          { en: 'Clear conversation',            pt: 'Limpar conversa' },
+  'ai.analysis':           { en: 'Portfolio Analysis',            pt: 'Análise de Portfólio' },
+  'ai.selectClient':       { en: 'Select a client above to run AI portfolio analysis', pt: 'Selecione um cliente acima para analisar o portfólio com IA' },
+  'ai.analyze':            { en: 'Analyze',                       pt: 'Analisar' },
+  'ai.rebalance':          { en: 'Rebalance',                     pt: 'Rebalancear' },
+  'ai.analyzing':          { en: 'Analyzing portfolio...',        pt: 'Analisando portfólio...' },
+  'ai.rebalancing':        { en: 'Generating rebalancing plan...', pt: 'Gerando plano de rebalanceamento...' },
+  'ai.analysisLabel':      { en: 'Portfolio Analysis',            pt: 'Análise de Portfólio' },
+  'ai.rebalanceLabel':     { en: 'Rebalancing Suggestion',        pt: 'Sugestão de Rebalanceamento' },
+  'ai.analyzeHint':        { en: 'Click Analyze for a full portfolio review or Rebalance for allocation suggestions', pt: 'Clique em Analisar para uma revisão completa ou Rebalancear para sugestões de alocação' },
+  'nav.ai':                { en: 'Finn AI',                       pt: 'Finn IA' },
 }
 
 const SettingsContext = createContext<Settings>({} as Settings)
