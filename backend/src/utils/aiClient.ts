@@ -5,6 +5,7 @@ const aiClient = axios.create({
   headers: {
     "X-Internal-Key": process.env.INTERNAL_API_KEY ?? "",
   },
+  timeout: 300000, // 5 minutos
 });
 
 export default aiClient;

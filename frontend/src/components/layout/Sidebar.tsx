@@ -14,8 +14,8 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
     { to: '/stocks',    icon: TrendingUp,       label: t('nav.stocks') },
     { to: '/quotes',    icon: DollarSign,       label: t('nav.quotes') },
     { to: '/news',      icon: Newspaper,        label: t('nav.news') },
-    { to: '/settings',  icon: Settings,         label: t('nav.settings') },
     { to: '/ai', icon: Sparkles, label: t('nav.ai') },
+    { to: '/settings',  icon: Settings,         label: t('nav.settings') },
   ]
 
   return (
