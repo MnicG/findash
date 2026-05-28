@@ -1,6 +1,7 @@
 import { prisma } from "../../config/prisma";
 import aiClient from "../../utils/aiClient";
 import { stocksService } from "../stocks/stocks.service";
+import { Response } from "express";
 
 export async function analyzePortfolio(clientId: string, userId: string) {
   const client = await prisma.client.findFirstOrThrow({
@@ -76,8 +77,9 @@ export async function newsImpact(clientId: string, userId: string, articles: obj
   return data.result;
 }
 
-export async function chat(
+export async function chatStream(
   messages: { role: string; content: string }[],
+  res: Response,
   clientId?: string,
   userId?: string
 ) {
@@ -87,7 +89,6 @@ export async function chat(
     const client = await prisma.client.findFirst({
       where: { id: clientId, userId },
     });
-
     if (client) {
       const positions = await prisma.position.findMany({ where: { clientId } });
       const transactions = await prisma.transaction.findMany({ where: { clientId } });
@@ -101,10 +102,16 @@ export async function chat(
     }
   }
 
-  const { data } = await aiClient.post("/ai/chat", {
-    messages,
-    client: clientContext,
-  });
+  const response = await aiClient.post(
+    "/ai/chat",
+    { messages, client: clientContext },
+    { responseType: "stream", timeout: 300000 }
+  );
 
-  return data.reply;
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("X-Accel-Buffering", "no");
+  res.setHeader("Connection", "keep-alive");
+
+  response.data.pipe(res);
 }

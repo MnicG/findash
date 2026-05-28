@@ -25,6 +25,5 @@ export const newsImpact = asyncHandler(async (req: AuthRequest, res: Response) =
 
 export const chat = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { messages, clientId } = req.body;
-  const result = await aiService.chat(messages, clientId, req.userId!);
-  res.json({ reply: result });
+  await aiService.chatStream(messages, res, clientId, req.userId!);
 });

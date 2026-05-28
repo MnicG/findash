@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useClients, useChat, useAnalyzePortfolio, useRebalancePortfolio } from '../../hooks'
+import { useClients, useAnalyzePortfolio, useRebalancePortfolio } from '../../hooks'
 import { useSettings } from '../../contexts/SettingsContext'
 import type { ChatMessage } from '../../api/ai.api'
 import Card from '../../components/ui/Card'
@@ -11,23 +11,72 @@ export default function AI() {
   const [selectedClientId, setSelectedClientId] = useState<string>('')
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
+  const [streamingMessage, setStreamingMessage] = useState('')
+  const [chatPending, setChatPending] = useState(false)
   const [analysisResult, setAnalysisResult] = useState('')
   const [analysisType, setAnalysisType] = useState<'analyze' | 'rebalance' | null>(null)
 
-  const chat = useChat()
   const analyze = useAnalyzePortfolio(selectedClientId)
   const rebalance = useRebalancePortfolio(selectedClientId)
-
   const selectedClient = clients.find(c => c.id === selectedClientId)
+  const isAnalyzing = analyze.isPending || rebalance.isPending
 
   const handleSend = async () => {
-    if (!input.trim() || chat.isPending) return
+    if (!input.trim() || chatPending) return
     const userMsg: ChatMessage = { role: 'user', content: input.trim() }
     const newMessages = [...messages, userMsg]
     setMessages(newMessages)
     setInput('')
-    const reply = await chat.mutateAsync({ messages: newMessages, clientId: selectedClientId || undefined })
-    setMessages(prev => [...prev, { role: 'assistant', content: reply }])
+    setStreamingMessage('')
+    setChatPending(true)
+
+    const token = localStorage.getItem('token')
+    const baseURL = import.meta.env.VITE_API_URL || '/api'
+
+    try {
+      const response = await fetch(`${baseURL}/ai/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ messages: newMessages, clientId: selectedClientId || undefined }),
+      })
+
+      const reader = response.body!.getReader()
+      const decoder = new TextDecoder()
+      let accumulated = ''
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        const text = decoder.decode(value)
+        const lines = text.split('\n')
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6)
+            if (data === '[DONE]') {
+              setMessages(prev => [...prev, { role: 'assistant', content: accumulated }])
+              setStreamingMessage('')
+              setChatPending(false)
+              return
+            }
+            try {
+              const parsed = JSON.parse(data)
+              if (parsed.chunk) {
+                accumulated += parsed.chunk
+                setStreamingMessage(accumulated)
+              }
+            } catch { /* ignore malformed chunks */ }
+          }
+        }
+      }
+    } catch {
+      setChatPending(false)
+      setStreamingMessage('')
+    }
   }
 
   const handleAnalyze = async (type: 'analyze' | 'rebalance') => {
@@ -39,8 +88,6 @@ export default function AI() {
       : await rebalance.mutateAsync()
     setAnalysisResult(result)
   }
-
-  const isAnalyzing = analyze.isPending || rebalance.isPending
 
   return (
     <div className="p-4 md:p-8 max-w-5xl mx-auto">
@@ -73,7 +120,7 @@ export default function AI() {
         </div>
       </Card>
 
-      {/* Main grid — stacks on mobile */}
+      {/* Main grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
 
         {/* Chat */}
@@ -84,7 +131,7 @@ export default function AI() {
           </h2>
 
           <div className="flex-1 overflow-y-auto space-y-3 mb-4 pr-1">
-            {messages.length === 0 && (
+            {messages.length === 0 && !streamingMessage && (
               <div className="h-full flex flex-col items-center justify-center text-center px-4">
                 <Bot size={32} className="text-slate-300 dark:text-slate-600 mb-3" />
                 <p className="text-sm text-slate-400">
@@ -92,6 +139,7 @@ export default function AI() {
                 </p>
               </div>
             )}
+
             {messages.map((msg, i) => (
               <div key={i} className={`flex gap-2.5 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
                 <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
@@ -112,7 +160,22 @@ export default function AI() {
                 </div>
               </div>
             ))}
-            {chat.isPending && (
+
+            {/* Streaming message */}
+            {streamingMessage && (
+              <div className="flex gap-2.5">
+                <div className="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 flex items-center justify-center shrink-0 mt-0.5">
+                  <Bot size={13} className="text-emerald-400" />
+                </div>
+                <div className="max-w-[80%] px-3.5 py-2.5 rounded-2xl rounded-tl-sm bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-sm leading-relaxed whitespace-pre-wrap">
+                  {streamingMessage}
+                  <span className="inline-block w-1.5 h-3.5 bg-emerald-400 ml-0.5 animate-pulse rounded-sm align-middle" />
+                </div>
+              </div>
+            )}
+
+            {/* Loading dots — only before first chunk arrives */}
+            {chatPending && !streamingMessage && (
               <div className="flex gap-2.5">
                 <div className="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 flex items-center justify-center shrink-0">
                   <Bot size={13} className="text-emerald-400" />
@@ -138,7 +201,7 @@ export default function AI() {
             />
             <button
               onClick={handleSend}
-              disabled={!input.trim() || chat.isPending}
+              disabled={!input.trim() || chatPending}
               className="bg-emerald-500 hover:bg-emerald-400 disabled:opacity-40 text-white px-3.5 py-2.5 rounded-xl transition-colors"
             >
               <Send size={15} />

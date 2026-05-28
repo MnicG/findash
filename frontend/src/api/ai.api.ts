@@ -14,7 +14,4 @@ export const aiApi = {
 
   newsImpact: (clientId: string, articles: object[]) =>
     api.post(`/ai/news/impact/${clientId}`, { articles }, { timeout: 300000 }).then(r => r.data.result as string),
-
-  chat: (messages: ChatMessage[], clientId?: string) =>
-    api.post('/ai/chat', { messages, clientId }, { timeout: 300000 }).then(r => r.data.reply as string),
 }
