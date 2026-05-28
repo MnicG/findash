@@ -4,6 +4,9 @@ import { quotesApi } from '../api/quotes.api'
 import { newsApi } from '../api/news.api'
 import type { Client, Position } from '../types'
 import { clientsApi } from '../api/clients.api'
+import { aiApi } from '../api/ai.api'
+import type { ChatMessage } from '../api/ai.api'
+import { useState } from 'react'
 
 export const useClientPositions = (clientId: string) =>
   useQuery({
@@ -118,6 +121,79 @@ export const useSearchNews = (q: string) =>
     queryFn: () => newsApi.search(q),
     enabled: !!q,
   })
+
+  export const useAnalyzePortfolio = (clientId: string) =>
+  useMutation({
+    mutationFn: () => aiApi.analyzePortfolio(clientId),
+  })
+
+export const useRebalancePortfolio = (clientId: string) =>
+  useMutation({
+    mutationFn: () => aiApi.rebalancePortfolio(clientId),
+  })
+
+export const useSummarizeNews = () =>
+  useMutation({
+    mutationFn: (articles: object[]) => aiApi.summarizeNews(articles),
+  })
+
+export const useNewsImpact = (clientId: string) =>
+  useMutation({
+    mutationFn: (articles: object[]) => aiApi.newsImpact(clientId, articles),
+  })
+
+export const useChat = () => {
+  const [isPending, setIsPending] = useState(false)
+
+  const streamChat = async (
+    messages: ChatMessage[],
+    onChunk: (chunk: string) => void,
+    onDone: () => void,
+    clientId?: string
+  ) => {
+    setIsPending(true)
+    const token = localStorage.getItem('token')
+    const baseURL = import.meta.env.VITE_API_URL || '/api'
+
+    const response = await fetch(`${baseURL}/ai/chat`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ messages, clientId }),
+    })
+
+    const reader = response.body!.getReader()
+    const decoder = new TextDecoder()
+
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+
+      const text = decoder.decode(value)
+      const lines = text.split('\n')
+
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const data = line.slice(6)
+          if (data === '[DONE]') {
+            onDone()
+            setIsPending(false)
+            return
+          }
+          try {
+            const parsed = JSON.parse(data)
+            if (parsed.chunk) onChunk(parsed.chunk)
+          } catch { /* ignore malformed chunks */ }
+        }
+      }
+    }
+    setIsPending(false)
+  }
+
+  return { streamChat, isPending }
+}
 
 // Fetches all clients with positions, then live prices for all unique symbols
 export const useDashboardSummary = () =>

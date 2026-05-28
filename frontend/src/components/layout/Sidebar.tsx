@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { useSettings } from '../../contexts/SettingsContext'
-import { LayoutDashboard, Users, TrendingUp, DollarSign, Newspaper, LogOut, Settings, X } from 'lucide-react'
+import { LayoutDashboard, Users, TrendingUp, DollarSign, Newspaper, LogOut, Settings, X, Sparkles } from 'lucide-react'
 
 export default function Sidebar({ onClose }: { onClose?: () => void }) {
   const { logout, user } = useAuth()
@@ -14,6 +14,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
     { to: '/stocks',    icon: TrendingUp,       label: t('nav.stocks') },
     { to: '/quotes',    icon: DollarSign,       label: t('nav.quotes') },
     { to: '/news',      icon: Newspaper,        label: t('nav.news') },
+    { to: '/ai', icon: Sparkles,                label: t('nav.ai') },
     { to: '/settings',  icon: Settings,         label: t('nav.settings') },
   ]
 
